@@ -1,0 +1,8 @@
+.vimrc
+*.iso
+*.iso.sig
+disk
+inc
+my_uefi_vars.fd
+netctl-profile
+startvm.sh

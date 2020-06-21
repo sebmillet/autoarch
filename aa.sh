@@ -21,11 +21,10 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses>.
 
-#
-# ABOUT NETWORK START
+# ABOUT NETWORK START {{{
 #
 #   On ethernet networks with DHCP, network connectivity is available out of the
-#   box. Therefore the simplest is to leave it as is at install time.
+#   box. The simplest is to leave it as is at install time.
 #
 #   If using a Wifi network, then you have to:
 #
@@ -36,28 +35,27 @@
 #      * Interface (check with command 'ip link show')
 #        THERE IS A PITFALL HERE
 #        If you check the interface name on an already installed Linux, you'll
-#        see something like 'wlp2s0' (this one means: wireless card on PCI bus
-#        2, slot 0).
+#        see something like 'wlp2s0' for example (this one means: wireless card
+#        on PCI bus 2, slot 0).
 #        archiso does not enforce the 'Predictable Network Interface Names'
 #        rules and you'll get the default name, typically, it'll be:
 #
 #        wlan0
 #
 #        When booting on your installed Arch Linux, your wireless card name will
-#        follow the aforementioned rules, that'll require updating the
-#        corresponding netctl profile file, as per this script it'll be
+#        follow the aforementioned rules. If you keep using netctl, you'll have
+#        to update the profile file accordingly. This script creates the 'main'
+#        profile, meaning, the configuration file is:
 #
 #        /etc/netctl/main
 #
 #      * ESSID (self-explanatory)
 #
-#      * Key (your ESSID' passphrase)
-#
-
-# TODO
+#      * Key (your ESSID' passphrase) }}}
+# TODO {{{
 #   Manage case when there is no swap
 #   Manage BIOS (instead of UEFI) system boot
-#   Network behind proxy
+#   Network behind proxy }}}
 
 set -euo pipefail
 
@@ -70,10 +68,14 @@ do_disk=y
 do_mirrorlist=y
 do_pacstrap=y
 do_fstab=y
+do_chroot=y
 
 interactive=y
 
 keymap=fr-latin1
+
+localhost='maison-arch'
+localdomain='localdomain'
 
 netctl_profile=main
 netctl_cfg=$(cat << end-of-file
@@ -124,10 +126,17 @@ mirrors_linerange='2,5'
     # Number of mirrors at the end of the update. {2,5} has 4 elements.
 linerange_size=4
 
-pacstrap_install="base linux linux-firmware"
+pacstrap_install='base linux linux-firmware'
+if [ "${docrypt}" == 'y' ]; then
+    pacstrap_extra='lvm2'
+fi
 
 tz=Europe/Paris
 loc_list=('en_US.UTF-8' 'fr_FR.UTF-8')
+locale='fr_FR.UTF-8'
+
+hooksline_before='HOOKS=(base udev autodetect modconf block filesystems keyboard fsck)'
+hooksline_after='HOOKS=(base udev autodetect keyboard keymap encrypt lvm2 modconf block filesystems fsck)'
 
 # CONFIG }}}
 
@@ -247,6 +256,17 @@ if [ "${docrypt}" == "y" ] && [ -n "${devswap}" ]; then
     exit 11
 fi
 
+t=${0:-}
+scriptname=${t/.\//}
+echo "${scriptname}"
+if [ "${interactive}" == "n" ]; then
+    if [ "${scriptname}" != "aa-wipe-data-without-confirmation" ]; then
+        echo "Error: not allowed to wipe data non interactively under the"
+        echo "current script name."
+        exit 15
+    fi
+fi
+
 if [ -z "${swapsizemb}" ]; then
     physicalmemorykb=$(grep MemTotal /proc/meminfo \
         | sed 's/^.*\s\([0-9]\+\).*$/\1/')
@@ -262,8 +282,7 @@ if [ "${dopart}" == "y" ]; then
     if [ -z "${devdisk}" ]; then
         if [ "${interactive:-y}" == "n" ]; then
             echo "Error: interactive mode is off, therefore the disk to install"
-            echo "Arch Linux on must be defined."
-            echo "Find the variable \$devdisk in this script and update it."
+            echo "Arch Linux on must be defined. Update the variable \$devdisk."
             exit 20
         fi
         echo "Disk to install Arch Linux on, example: /dev/sda"
@@ -331,8 +350,8 @@ else
     if [ -z "${devdata}" ]; then
         if [ "${interactive:-y}" == "n" ]; then
             echo "Error: interactive mode is off, therefore the partition to"
-            echo "install Arch Linux on must be defined."
-            echo "Find the variable \$devdata in this script and update it."
+            echo "install Arch Linux on must be defined. Update the variable"
+            echo "\$devdata."
             exit 20
         fi
         echo "Partition to install Arch Linux on, example: /dev/sda2"
@@ -562,7 +581,7 @@ if ! mount | grep '\s/mnt\s'; then
 fi
 
     # shellcheck disable=SC2086
-pacstrap /mnt ${pacstrap_install}
+pacstrap /mnt ${pacstrap_install} ${pacstrap_extra}
 
 echo "== PACSTRAP: OK"
 touch .do_pacstrap_done
@@ -584,6 +603,13 @@ genfstab -U /mnt >> /mnt/etc/fstab
 echo "== FSTAB: OK"
 touch .do_fstab_done
 fi # do_fstab }}}
+# MISC(CHROOT) {{{
+
+if [ "${do_chroot}" == "y" ] && [ -e .do_chroot_done ]; then
+    echo ".. CHROOT: already done, skipped"
+    do_chroot=n
+fi
+if [ "${do_chroot}" == "y" ]; then
 
 sep=
 loc_regex=
@@ -593,13 +619,18 @@ for l in "${loc_list[@]}"; do
 done
 loc_nb="${#loc_list[@]}"
 
+if [ ! -e hosts.orig ]; then
+    cp -ip /mnt/etc/hosts hosts.orig
+fi
+cp -p hosts.orig /mnt/etc/hosts
+
 cat > /mnt/subscript.sh << end-of-file
 #!/usr/bin/bash
 
 set -euo pipefail
 
 if [ ! -f /usr/share/zoneinfo/${tz} ]; then
-    echo "File /usr/share/zoneinfo/${tz} does not exist"
+    echo 'File /usr/share/zoneinfo/${tz} does not exist'
     exit 1
 fi
 ln -sf /usr/share/zoneinfo/${tz} /etc/localtime
@@ -613,17 +644,52 @@ cp -p /root/locale.gen.orig /etc/locale.gen
 sed -i 's/^#\(${loc_regex}\)/\1/' /etc/locale.gen
 nb=\$(grep -c "^[^#]" /etc/locale.gen)
 if [ "\${nb}" -ne "${loc_nb}" ]; then
-    echo "Error: inconsistent result while updating /etc/locale.gen"
-    echo "Probable cause: non-existent locale in \\\$loc_list"
+    echo 'Error: inconsistent result while updating /etc/locale.gen'
+    echo 'Probable cause: non-existent locale in \$loc_list'
     exit 2
 fi
+locale-gen
 
-echo "Done"
+echo 'LANG=${locale}' > /etc/locale.conf
+echo 'KEYMAP=${keymap}' > /etc/vconsole.conf
+
+echo '${localhost}' > /etc/hostname
+echo '' >> /etc/hosts
+echo '127.0.0.1	localhost' >> /etc/hosts
+echo '::1	localhost' >> /etc/hosts
+echo '127.0.0.1	${localhost}.${localdomain} ${localhost}' >> /etc/hosts
+
+if [ '${docrypt}' == 'y' ]; then
+    sed -i 's/^${hooksline_before}$/${hooksline_after}/' /etc/mkinitcpio.conf
+    if [ \$(grep -c '^${hooksline_after}$' /etc/mkinitcpio.conf) -ne 1 ]; then
+        echo "Error: /etc/mkinitcpio.conf update error"
+        exit 16
+    fi
+fi
+
+mkinitcpio -P
+
+bootctl install
+
+echo 'subscript terminated'
 end-of-file
 
 chmod +x /mnt/subscript.sh
+set +e
 arch-chroot /mnt /subscript.sh
+r=$?
+set -e
 
-echo "Au revoir"
+if [ "${r}" != "0" ]; then
+    echo "subscript ran with error(s)."
+    echo "Aborted."
+    exit 17
+fi
+
+echo "== CHROOT: OK"
+touch .do_chroot_done
+fi # do_chroot }}}
+
+echo 'Au revoir'
 
 # vim: ts=4:sw=4:et:tw=80:fmr={{{,}}}:fdm=marker:
