@@ -69,6 +69,7 @@ do_mirrorlist=y
 do_pacstrap=y
 do_fstab=y
 do_chroot=y
+do_postinst=y
 
 interactive=y
 
@@ -78,8 +79,9 @@ localhost='maison-arch'
 localdomain='localdomain'
 
 netctl_profile=main
+    # NETCTL FILE USED *DURING* INSTALL
 netctl_cfg=$(cat << end-of-file
-Description='Main Connection'
+Description='Main Connection For Install'
 Interface=wlan0
 Connection=wireless
 Security=wpa
@@ -91,6 +93,18 @@ end-of-file
     # Wait time between "netctl start" and "ping" test, in seconds
 netctl_wait=15
 server_to_ping='archlinux.org'
+pacstrap_net_extra='netctl wpa_supplicant dhcpcd'
+
+    # NETCTL FILE USED *AFTER* INSTALL
+    # Beware of 'Predictable Network Interface Names'! (eth0 needs be renamed)
+    # For ex. if in a qemu VM with default settings, it'll be ens3
+netctl_cfg_postinst=$(cat << end-of-file
+Description='Main Connection'
+Interface=eth0
+Connection=ethernet
+IP=dhcp
+end-of-file
+)
 
     #   y: wipe all disk
     #   n: wipe only devdata (leave top level partitionning untouched)
@@ -98,7 +112,7 @@ server_to_ping='archlinux.org'
     #      partitionned, still.
 dopart=y
     # Disk to partition, example: /dev/sda
-devdisk=
+devdisk=/dev/sda
 efipartname="EFI System Partition"
 lvmpartname="main"
     # EFI partition, example: /dev/sda1
@@ -115,7 +129,7 @@ rootname=rootfs
     #   y: encrypt devdata and create swap and rootfs underneath (with LVM)
     #   n: use devdata in plain
 docrypt=y
-    # VERY BAD PRACTICE TO WRITE A PASSWORD HERE! YOU'VE BEEN WARNED.
+    # VERY BAD PRACTICE TO WRITE A PASSWORD HERE! YOU'VE BEEN WARNED
 cryptpwd="1234"
 cryptmappername=clvm
     # LVM
@@ -126,10 +140,14 @@ mirrors_linerange='2,5'
     # Number of mirrors at the end of the update. {2,5} has 4 elements.
 linerange_size=4
 
-pacstrap_install='base linux linux-firmware'
+    # IMPORTANT
+    #   bootctl setup assumes linux-lts is installed in addition to linux
+pacstrap_install='base linux linux-lts linux-firmware'
+pacstrap_extra=
 if [ "${docrypt}" == 'y' ]; then
     pacstrap_extra='lvm2'
 fi
+pacman_install='man vim sudo linux-headers linux-lts-headers'
 
 tz=Europe/Paris
 loc_list=('en_US.UTF-8' 'fr_FR.UTF-8')
@@ -138,7 +156,24 @@ locale='fr_FR.UTF-8'
 hooksline_before='HOOKS=(base udev autodetect modconf block filesystems keyboard fsck)'
 hooksline_after='HOOKS=(base udev autodetect keyboard keymap encrypt lvm2 modconf block filesystems fsck)'
 
+timeout=3
+kernel_opts='pci=noaer'
+
+    # cu = Created User
+cu_login=sebastien
+cu_comment="Sébastien Millet"
+    # IMPORTANT
+    #   The 'wheel' membership is assumed when updating /etc/sudoers
+cu_groups="power,wheel,audio,kvm,users,systemd-journal"
+cu_password=
+
 # CONFIG }}}
+
+if [ "${interactive}" == "n" ] && [ -z "${cu_password}" ]; then
+    echo "Error: you must provide password of user ${cu_login} if running non"
+    echo "interactively."
+    exit 23
+fi
 
 # REVERT DISK OPERATIONS {{{
 if [ "${1:-}" == "stop" ]; then
@@ -256,9 +291,15 @@ if [ "${docrypt}" == "y" ] && [ -n "${devswap}" ]; then
     exit 11
 fi
 
+if [ "${docrypt}" == "y" ] && [ "${interactive}" == "n" ] \
+    && [ -z "${cryptpwd}" ]; then
+    echo "Error: if you want to crypt a volume while in non-interactive mode,"
+    echo "you must provide the password in \$cryptpwd."
+    exit 21
+fi
+
 t=${0:-}
 scriptname=${t/.\//}
-echo "${scriptname}"
 if [ "${interactive}" == "n" ]; then
     if [ "${scriptname}" != "aa-wipe-data-without-confirmation" ]; then
         echo "Error: not allowed to wipe data non interactively under the"
@@ -581,7 +622,7 @@ if ! mount | grep '\s/mnt\s'; then
 fi
 
     # shellcheck disable=SC2086
-pacstrap /mnt ${pacstrap_install} ${pacstrap_extra}
+pacstrap /mnt ${pacstrap_install} ${pacstrap_extra} ${pacstrap_net_extra}
 
 echo "== PACSTRAP: OK"
 touch .do_pacstrap_done
@@ -623,6 +664,26 @@ if [ ! -e hosts.orig ]; then
     cp -ip /mnt/etc/hosts hosts.orig
 fi
 cp -p hosts.orig /mnt/etc/hosts
+
+if [ "${docrypt}" == "y" ]; then
+    t=$(blkid | grep -c -i \
+                "type="'"'"crypto_LUKS"'"'".*partlabel="'"'"${lvmpartname}"'"')
+    if [ "${t}" -ne "1" ]; then
+        echo "Error: could not work out the main encrypted partition."
+        exit 18
+    fi
+    kerneluuid=$(blkid | grep -i \
+                "type="'"'"crypto_LUKS"'"'".*partlabel="'"'"${lvmpartname}"'"' \
+                | sed 's/^.* UUID="\([^"]\+\)".*$/\1/')
+
+else
+    d=$(df /mnt | sed '1d;s/\s.*$//')
+    kerneluuid=$(blkid "${d}" | sed 's/^.* UUID="\([^"]\+\)".*$/\1/')
+fi
+if [ -z "${kerneluuid}" ]; then
+    echo "Error: could not work out kernel UUID volume location."
+    exit 19
+fi
 
 cat > /mnt/subscript.sh << end-of-file
 #!/usr/bin/bash
@@ -670,6 +731,65 @@ fi
 mkinitcpio -P
 
 bootctl install
+cat > /boot/loader/loader.conf << embedded-end-of-file
+default Arch Linux
+timeout ${timeout}
+editor no
+embedded-end-of-file
+if [ "${docrypt}" == "y" ]; then
+
+    cat > /boot/loader/entries/arch.conf << embedded-end-of-file
+Title Arch Linux
+linux /vmlinuz-linux
+initrd /initramfs-linux.img
+options cryptdevice=UUID=${kerneluuid}:${cryptmappername} root=/dev/${vgname}/${rootname} ${kernel_opts}
+embedded-end-of-file
+
+    cat > /boot/loader/entries/arch-lts.conf << embedded-end-of-file
+Title Arch Linux LTS
+linux /vmlinuz-linux-lts
+initrd /initramfs-linux-lts.img
+options cryptdevice=UUID=${kerneluuid}:${cryptmappername} root=/dev/${vgname}/${rootname} ${kernel_opts}
+embedded-end-of-file
+
+else
+
+    cat > /boot/loader/entries/arch.conf << embedded-end-of-file
+Title Arch Linux
+linux /vmlinuz-linux
+initrd /initramfs-linux.img
+options root=UUID=${kerneluuid} ${kernel_opts}
+embedded-end-of-file
+
+    cat > /boot/loader/entries/arch-lts.conf << embedded-end-of-file
+Title Arch Linux LTS
+linux /vmlinuz-linux-lts
+initrd /initramfs-linux-lts.img
+options root=UUID=${kerneluuid} ${kernel_opts}
+embedded-end-of-file
+
+fi
+
+(echo "password"; echo "password") | passwd
+echo 'root password is: password'
+
+if [ -n "${pacman_install}" ]; then
+        # shellcheck disable=SC2086
+    pacman --noconfirm -S ${pacman_install}
+fi
+
+useradd -d "/home/${cu_login}" -c "${cu_comment}" -m -U -G "${cu_groups}" "${cu_login}"
+sed -i 's/# %wheel ALL=(ALL) ALL/%wheel ALL=(ALL) ALL/' /etc/sudoers
+if [ \$(grep -c '^%wheel ALL=(ALL) ALL$' /etc/sudoers) -ne 1 ]; then
+    echo "Error: /etc/sudoers update error"
+    exit 22
+fi
+if [ -n "${cu_password}" ]; then
+    (echo "${cu_password}"; echo "${cu_password}") | passwd sebastien
+else
+    echo "Update of ${cu_login} password"
+    passwd sebastien
+fi
 
 echo 'subscript terminated'
 end-of-file
@@ -681,14 +801,26 @@ r=$?
 set -e
 
 if [ "${r}" != "0" ]; then
-    echo "subscript ran with error(s)."
-    echo "Aborted."
+    echo "Error: subscript ran with error(s). Aborted."
     exit 17
 fi
 
 echo "== CHROOT: OK"
 touch .do_chroot_done
 fi # do_chroot }}}
+# POSTINST {{{
+
+if [ "${do_postinst}" == "y" ] && [ -e .do_postinst_done ]; then
+    echo ".. POSTINST: already done, skipped"
+    do_postinst=n
+fi
+if [ "${do_postinst}" == "y" ]; then
+
+echo "${netctl_cfg_postinst}" > "/mnt/etc/netctl/${netctl_profile}"
+
+echo "== POSTINST: OK"
+touch .do_postinst_done
+fi # do_postinst }}}
 
 echo 'Au revoir'
 
