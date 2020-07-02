@@ -786,6 +786,8 @@ useradd -d "/home/${cu_login}" -c "${cu_comment}" -m -U -G "${cu_groups}" \
     -s /usr/bin/zsh "${cu_login}"
 mkdir "/home/${cu_login}/bin"
 chown "${cu_login}": "/home/${cu_login}/bin"
+mkdir "/home/${cu_login}/tmp"
+chown "${cu_login}": "/home/${cu_login}/tmp"
 
 sed -i 's/# %wheel ALL=(ALL) ALL/%wheel ALL=(ALL) ALL/' /etc/sudoers
 if [ \$(grep -c '^%wheel ALL=(ALL) ALL$' /etc/sudoers) -ne 1 ]; then

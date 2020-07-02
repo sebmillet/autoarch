@@ -5,6 +5,8 @@
 set -eu
 
 export LANG=''
+mkdir ~/tmp
+cd ~/tmp
 
 echo "* ************************************** *"
 echo "* INSTALLING package-query FROM GIT REPO *"
