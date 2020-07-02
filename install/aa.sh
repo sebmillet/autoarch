@@ -112,7 +112,7 @@ end-of-file
     #      partitionned, still.
 dopart=y
     # Disk to partition, example: /dev/sda
-devdisk=/dev/sda
+devdisk=
 efipartname="EFI System Partition"
 lvmpartname="main"
     # EFI partition, example: /dev/sda1
@@ -128,9 +128,9 @@ rootname=rootfs
     # Encrypt devdata?
     #   y: encrypt devdata and create swap and rootfs underneath (with LVM)
     #   n: use devdata in plain
-docrypt=n
+docrypt=y
     # VERY BAD PRACTICE TO WRITE A PASSWORD HERE! YOU'VE BEEN WARNED
-cryptpwd="1234"
+cryptpwd=
 cryptmappername=clvm
     # LVM
 vgname=vol
@@ -149,7 +149,8 @@ if [ "${docrypt}" == 'y' ]; then
 fi
     # IMPORTANT
     #   useradd selects zsh as user's shell
-pacman_install='man vim sudo linux-headers linux-lts-headers tmux zsh fzf'
+pacman_install='man vim sudo linux-headers linux-lts-headers tmux zsh fzf ' \
+    'openssh base-devel git'
 
 tz=Europe/Paris
 loc_list=('en_US.UTF-8' 'fr_FR.UTF-8')
@@ -707,8 +708,8 @@ cp -p /root/locale.gen.orig /etc/locale.gen
 sed -i 's/^#\(${loc_regex}\)/\1/' /etc/locale.gen
 nb=\$(grep -c "^[^#]" /etc/locale.gen)
 if [ "\${nb}" -ne "${loc_nb}" ]; then
-    echo 'Error: inconsistent result while updating /etc/locale.gen'
-    echo 'Probable cause: non-existent locale in \$loc_list'
+    echo "Error: inconsistent result while updating /etc/locale.gen"
+    echo "Probable cause: non-existent locale in \\\$loc_list"
     exit 2
 fi
 locale-gen
@@ -717,10 +718,11 @@ echo 'LANG=${locale}' > /etc/locale.conf
 echo 'KEYMAP=${keymap}' > /etc/vconsole.conf
 
 echo '${localhost}' > /etc/hostname
-echo '' >> /etc/hosts
-echo '127.0.0.1	localhost' >> /etc/hosts
-echo '::1	localhost' >> /etc/hosts
-echo '127.0.0.1	${localhost}.${localdomain} ${localhost}' >> /etc/hosts
+{   echo '' >> /etc/hosts; \
+echo '127.0.0.1	localhost'; \
+echo '::1	localhost'; \
+echo '127.0.0.1	${localhost}.${localdomain} ${localhost}'; \
+} >> /etc/hosts
 
 if [ '${docrypt}' == 'y' ]; then
     sed -i 's/^${hooksline_before}$/${hooksline_after}/' /etc/mkinitcpio.conf
@@ -824,216 +826,12 @@ if [ "${do_postinst}" == "y" ]; then
 
 echo "${netctl_cfg_postinst}" > "/mnt/etc/netctl/${netctl_profile}"
 
-f="/mnt/home/${cu_login}/.zshrc"
-sed -n '/^# =====BEGIN .zshrc=====$/,/^# =====END .zshrc=====$/{//!p}' \
-    ${0:-} > "${f}"
-sed -i 's/<<<cu_login>>>/'"${cu_login}"'/g' "${f}"
-
-sed -n '/^# =====BEGIN .aliases=====$/,/^# =====END .aliases=====$/{//!p}' \
-    ${0:-} > "/mnt/home/${cu_login}/.aliases"
-
-sed -n '/^# =====BEGIN .tmux.conf=====$/,/^# =====END .tmux.conf=====$/{//!p}' \
-    ${0:-} > "/mnt/home/${cu_login}/.tmux.conf"
+cp "${0:-}" "/mnt/home/${cu_login}/."
 
 echo "== POSTINST: OK"
 touch .do_postinst_done
 fi # do_postinst }}}
 
-echo 'Au revoir'
-exit
-
-# CONFIG FILES {{{
-
-# ############################################################################
-# =====BEGIN .aliases=====
-# ~/.aliases
-
-alias ll='ls -hNl --color=auto'
-alias lla='ls -hNal --color=auto'
-alias ccd='cd ~/travail/cpp/seb'
-alias cch='cd ~/travail/hongrois'
-alias cchc='cd ~/travail/hongrois/cours'
-alias ccs='cd ~/travail/scripts'
-alias cct='cd ~/travail'
-alias ccz='cd /mnt/zd'
-alias cca='cd ~/travail/cpp/seb/arduino'
-alias ccad='cd ~/travail/cpp/arduino-divers'
-alias ccb='cd /mnt/btr'
-
-alias ccslib='cd ~/travail/cpp/seb/arduino/libraries'
-alias ccalib='cd ~/travail/arduino-1.8.9/libraries'
-alias cccom='cd ~/travail/cpp/seb/arduino/868/cc1101/cc1101-com'
-alias ccdom='cd ~/travail/cpp/seb/arduino/868/domotique'
-
-alias zl='zfs list'
-alias zla='zfs list -t all'
-alias zg='zfs get'
-alias zga='zfs get all'
-alias zps='zpool status'
-alias zpl='zpool list'
-
-alias musb='mount | grep "\bsd[a-z]"'
-
-alias g='git'
-alias gst='git status'
-alias gg='git --no-pager'
-
-alias zgit="git log --oneline | fzf --bind \"ctrl-q:preview-page-up,ctrl-w:preview-page-down\" --layout=reverse-list --multi --preview 'git show {+1}'"
-alias zll='find -maxdepth 1 -type f | fzf --bind "ctrl-q:preview-page-up,ctrl-w:preview-page-down" --preview="cat {-1}"'
-alias zprev='fzf --bind "ctrl-q:preview-page-up,ctrl-w:preview-page-down" --preview="cat {1}"'
-alias zrprev='fzf --layout=reverse-list --bind "ctrl-q:preview-page-up,ctrl-w:preview-page-down" --preview="cat {1}"'
-
-# From https://wiki.archlinux.org/index.php/Fzf
-alias zpac='pacman -Slq | fzf --multi --preview '"'"'pacman -Si {1}'"'"
-alias zpacf='pacman -Slq | fzf --multi --preview '"'"'cat <(pacman -Si {1}) <(pacman -Fl {1} | awk "{print \$2}")'"'"
-
-alias -s pdf=evince
-alias -s html=firefox
-alias -s mp4=vlc
-alias -s mov=vlc
-alias -s mp3=totem
-alias -s jpg=eog
-alias -s png=eog
-# =====END .aliases=====
-# ############################################################################
-
-# ############################################################################
-# =====BEGIN .zshrc=====
-# Lines configured by zsh-newuser-install
-HISTFILE=~/.histfile
-HISTSIZE=20000
-SAVEHIST=20000
-setopt autocd nomatch
-bindkey -e
-# End of lines configured by zsh-newuser-install
-# The following lines were added by compinstall
-zstyle :compinstall filename '/home/<<<cu_login>>>/.zshrc'
-
-autoload -Uz compinit
-compinit
-# End of lines added by compinstall
-
-# Fix management of keys Home, End and Suppr.
-bindkey  "\eO1~"  beginning-of-line
-bindkey  "\eO4~"  end-of-line
-bindkey  "\eO3~"  delete-char
-bindkey  "^[[1~"  beginning-of-line
-bindkey  "^[[4~"  end-of-line
-bindkey  "^[[3~"  delete-char
-
-PROMPT='%F{blue}%~%f %(!.#.$) '
-
-# From https://unix.stackexchange.com/questions/97843/how-can-i-search-history-with-text-already-entered-at-the-prompt-in-zsh/97844
-autoload -U history-search-end
-zle -N history-beginning-search-backward-end history-search-end
-zle -N history-beginning-search-forward-end history-search-end
-bindkey '\eOA' history-beginning-search-backward-end
-bindkey '\eOB' history-beginning-search-forward-end
-bindkey '^[[A' history-beginning-search-backward-end
-bindkey '^[[B' history-beginning-search-forward-end
-
-# To compile with openssl-1.0 instead of openssl-1.1
-#export PKG_CONFIG_PATH=/usr/lib/openssl-1.0/pkgconfig
-#export CFLAGS=" -I/usr/include/openssl-1.0"
-#export LDFLAGS=" -L/usr/lib/openssl-1.0 -lssl"
-
-export VISUAL=gvim
-export ARDUINO_USER_LIBS=~/Arduino/libraries
-
-# From perl' local::lib
-PATH="/home/<<<cu_login>>>/perl5/bin${PATH:+:${PATH}}"; export PATH;
-PERL5LIB="/home/<<<cu_login>>>/perl5/lib/perl5${PERL5LIB:+:${PERL5LIB}}"; export PERL5LIB;
-PERL_LOCAL_LIB_ROOT="/home/<<<cu_login>>>/perl5${PERL_LOCAL_LIB_ROOT:+:${PERL_LOCAL_LIB_ROOT}}"; export PERL_LOCAL_LIB_ROOT;
-PERL_MB_OPT="--install_base \"/home/<<<cu_login>>>/perl5\""; export PERL_MB_OPT;
-PERL_MM_OPT="INSTALL_BASE=/home/<<<cu_login>>>/perl5"; export PERL_MM_OPT;
-
-PATH=$PATH:/home/<<<cu_login>>>/bin
-
-source ~/.aliases
-
-source /usr/share/fzf/key-bindings.zsh
-source /usr/share/fzf/completion.zsh
-# =====END .zshrc=====
-# ############################################################################
-
-# ############################################################################
-# =====BEGIN .tmux.conf=====
-# ~/.tmux.conf
-
-# From
-#   https://www.hamvocke.com/blog/a-guide-to-customizing-your-tmux-conf
-
-# remap prefix from 'C-b' to 'C-a'
-unbind C-b
-set-option -g prefix C-w
-bind-key C-w send-prefix
-
-# split panes using | and -
-bind | split-window -h
-bind - split-window -v
-unbind '"'
-unbind %
-
-# reload config file (change file location to your the tmux.conf you want to
-# use).
-bind r source-file ~/.tmux.conf
-
-# switch panes using Alt-arrow without prefix
-bind -n C-S-Left select-pane -L
-bind -n C-S-Right select-pane -R
-bind -n C-S-Up select-pane -U
-bind -n C-S-Down select-pane -D
-
-bind w copy-mode
-bind p paste-buffer
-setw -g mode-keys vi
-
-set-option -g history-limit 20000
-
-setw -g mouse on
-
-######################
-### DESIGN CHANGES ###
-######################
-
-# loud or quiet?
-set -g visual-activity off
-set -g visual-bell off
-set -g visual-silence off
-setw -g monitor-activity off
-set -g bell-action none
-
-#  modes
-setw -g clock-mode-colour colour5
-setw -g mode-style 'fg=colour1 bg=colour18 bold'
-
-# panes
-set -g pane-border-style 'fg=colour19 bg=colour0'
-set -g pane-active-border-style 'bg=colour0 fg=colour9'
-
-# statusbar
-set -g status-position bottom
-set -g status-justify left
-# set -g status-style 'bg=colour18 fg=colour137 dim'
-set -g status-left ''
-# set -g status-right '#[fg=colour233,bg=colour19] %d/%m #[fg=colour233,bg=colour8] %H:%M:%S '
-set -g status-right-length 50
-set -g status-left-length 20
-
-# setw -g window-status-current-style 'fg=colour1 bg=colour19 bold'
-# setw -g window-status-current-format ' #I#[fg=colour249]:#[fg=colour255]#W#[fg=colour249]#F '
-
-# setw -g window-status-style 'fg=colour9 bg=colour18'
-# setw -g window-status-format ' #I#[fg=colour237]:#[fg=colour250]#W#[fg=colour244]#F '
-
-setw -g window-status-bell-style 'fg=colour255 bg=colour1 bold'
-
-# messages
-# set -g message-style 'fg=colour232 bg=colour16 bold'
-
-# =====END .tmux.conf=====
-# ############################################################################
-
-# END OF CONFIG FILES }}}
+echo 'Installation complete'
 
 # vim: ts=4:sw=4:et:tw=80:fmr={{{,}}}:fdm=marker:
