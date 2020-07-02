@@ -6,7 +6,7 @@ update:
 	cp -av src/uefikeys-Makefile uefikeys/Makefile
 
 dist:
-	@if [ ! -f uefikeys/db.key ]; then \
+	@if [ ! -f uefikeys/Makefile ]; then \
 		echo "Incorrect or missing uefikeys directory:" \
 			 "run 'sudo make update' first"; \
 		exit 1; \
