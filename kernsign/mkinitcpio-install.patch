@@ -1,0 +1,11 @@
+--- /usr/share/libalpm/scripts/mkinitcpio-install	2020-02-24 20:53:08.000000000 +0100
++++ /usr/local/share/libalpm/scripts/mkinitcpio-install	2020-07-02 11:05:22.999997531 +0200
+@@ -28,7 +28,7 @@
+     fi
+ 
+     # always install the kernel
+-    install -Dm644 "${line}" "/boot/vmlinuz-${pkgbase}"
++    sbsign --key /usr/local/etc/uefikeys/db.key --cert /usr/local/etc/uefikeys/db.crt --output "/boot/vmlinuz-${pkgbase}" "${line}"
+ 
+     # compound args for each kernel
+     args+=(-p "${pkgbase}")

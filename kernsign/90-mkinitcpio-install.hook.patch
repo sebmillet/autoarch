@@ -1,0 +1,9 @@
+--- /usr/share/libalpm/hooks/90-mkinitcpio-install.hook	2020-02-24 20:53:08.000000000 +0100
++++ /etc/pacman.d/hooks/90-mkinitcpio-install.hook	2020-06-07 20:13:47.490626654 +0200
+@@ -8,5 +8,5 @@
+ [Action]
+ Description = Updating linux initcpios...
+ When = PostTransaction
+-Exec = /usr/share/libalpm/scripts/mkinitcpio-install
++Exec = /usr/local/share/libalpm/scripts/mkinitcpio-install
+ NeedsTargets
