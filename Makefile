@@ -22,7 +22,8 @@ dist:
 	mv src/kernsign.tar.gz install/cfg-03-kernsign.tar.gz
 	cp src/freezpkg.sh install/cfg-04-freezpkg.sh
 	cp src/gnome-inst.sh install/cfg-05-gnome-inst.sh
-	cp src/gnome-conf.sh install/cfg-06-gnome-conf.sh
+	cp src/gnome-conf.pseudo_sh install/cfg-06-gnome-conf.sh
+	./manage-includes.sh install/cfg-06-gnome-conf.sh
 
 clean:
 	rm -rf install

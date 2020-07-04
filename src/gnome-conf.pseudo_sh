@@ -2,6 +2,11 @@
 
 # Copyright 2020 Sébastien Millet
 
+# IMPORTANT
+#   The file 'as is' is not executable. You must pass it on to the
+#   manage-includes.sh script to replace #!include statements with the
+#   corresponding file content.
+
 set -euo pipefail
 
 # ############################################################################
@@ -74,11 +79,10 @@ mv ~/tmp/ignore-lid-switch-tweak.desktop ~/.config/autostart/
 #         To avoid file writes back and forth, the solution consists in linking
 #         alacritty config file to a pre-defined configuration file.
 
-cat > ~/tmp/gnome-autostart << EOF
-#!/usr/bin/bash
+cat > ~/tmp/gnome-autostart << GNOME_CONF_SH_EOF
+#!include "/usr/local/bin/gnome-autostart"
+GNOME_CONF_SH_EOF
 
-ln -sf ~/.alacritty.yml.gnome ~/.config/alacritty/alacritty.yml
-EOF
 chmod +x ~/tmp/gnome-autostart
 echo "sudo mv ~/tmp/gnome-autostart /usr/local/bin/gnome-autostart"
 sudo mv ~/tmp/gnome-autostart /usr/local/bin/gnome-autostart
