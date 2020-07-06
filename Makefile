@@ -12,6 +12,7 @@ dist:
 		exit 1; \
 	fi
 	mkdir -p install
+	cp src/Makefile install/
 	cp src/aa.sh install/
 	cp src/yaourt.sh install/cfg-01-yaourt.sh
 	tar -zcvf uefikeys.tar.gz uefikeys
@@ -24,8 +25,20 @@ dist:
 	cp src/gnome-inst.sh install/cfg-05-gnome-inst.sh
 	cp src/gnome-conf.pseudo_sh install/cfg-06-gnome-conf.sh
 	./manage-includes.sh install/cfg-06-gnome-conf.sh
+	cp src/i3-inst.sh install/cfg-07-i3-inst.sh
+	mkdir -p install/i3-conf && \
+		cd install/i3-conf && \
+		cp -vL --preserve=all ../../src/i3-conf/* . && \
+		cd .. && \
+		tar -zcvf cfg-08-i3-conf.tar.gz i3-conf && \
+		rm i3-conf/* && \
+		rmdir i3-conf
+	tar -zcvf IN$(shell date +%y%m%d).tgz install
 
 clean:
+	if [ -e install/Makefile ]; then \
+		cd install && $(MAKE) clean; \
+	fi
 	rm -rf install
 
 mrproper: clean

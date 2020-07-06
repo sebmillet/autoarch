@@ -63,12 +63,9 @@ gsettings set org.gnome.desktop.notifications show-in-lock-screen 'false'
 gsettings set org.gnome.desktop.wm.preferences button-layout 'appmenu:minimize,maximize,close'
 
 mkdir -p ~/tmp
-cat > ~/tmp/ignore-lid-switch-tweak.desktop << EOF
-[Desktop Entry]
-Type=Application
-Name=ignore-lid-switch-tweak
-Exec=/usr/lib/gnome-tweak-tool-lid-inhibitor
-EOF
+cat > ~/tmp/ignore-lid-switch-tweak.desktop << GNOME_CONF_SH_EOF
+#!include "~/.config/autostart/ignore-lid-switch-tweak.desktop"
+GNOME_CONF_SH_EOF
 mkdir -p ~/.config/autostart
 mv ~/tmp/ignore-lid-switch-tweak.desktop ~/.config/autostart/
 
