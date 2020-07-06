@@ -1,6 +1,9 @@
 default:
 	@echo "Run 'make NN' to install/configure element 'NN'"
 
+aa:
+	./aa.sh
+
 cfg-seb: 00
 
 00:
@@ -43,9 +46,18 @@ i3: 07 08
 	gpg --recv-key 9B8450B91D1362C1
 	yaourt -a j4-dmenu-desktop
 
+i3-conf: 08
+
 08:
 	tar -zxvf cfg-08-i3-conf.tar.gz
 	cd i3-conf && $(MAKE) install
+
+gui-apps: 09
+
+09:
+	sudo pacman -S thunderbird thunderbird-i18n-fr
+	sudo pacman -S firefox firefox-i18n-fr
+	sudo pacman -S alacritty
 
 clean:
 	rm -rf cfg-seb
