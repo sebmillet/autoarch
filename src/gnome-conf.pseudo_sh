@@ -84,3 +84,10 @@ chmod +x ~/tmp/gnome-autostart
 echo "sudo mv ~/tmp/gnome-autostart /usr/local/bin/gnome-autostart"
 sudo mv ~/tmp/gnome-autostart /usr/local/bin/gnome-autostart
 
+read -r -p "Launch gdm at startup? (y/N)" resp
+
+if [ "${resp}" == "y" ]; then
+    echo "sudo systemctl enable gdm"
+    sudo systemctl enable gdm
+fi
+

@@ -2,6 +2,7 @@ copytarget=/usr/local/etc/uefikeys
 
 default:
 	@echo "Run 'sudo make install' to install UEFI keys"
+	exit 1
 
 install:
 	mkdir -p "${copytarget}"

@@ -25,7 +25,6 @@ dist:
 	cp src/gnome-inst.sh install/cfg-05-gnome-inst.sh
 	cp src/gnome-conf.pseudo_sh install/cfg-06-gnome-conf.sh
 	./manage-includes.sh install/cfg-06-gnome-conf.sh
-	cp src/i3-inst.sh install/cfg-07-i3-inst.sh
 	mkdir -p install/i3-conf && \
 		cd install/i3-conf && \
 		cp -vL --preserve=all ../../src/i3-conf/* . && \
@@ -39,6 +38,7 @@ clean:
 	if [ -e install/Makefile ]; then \
 		cd install && $(MAKE) clean; \
 	fi
+	cd ~/travail/svg/configs && $(MAKE) clean
 	rm -rf install
 
 mrproper: clean

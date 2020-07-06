@@ -1,0 +1,1 @@
+/usr/share/bumblebee-status/bumblebee_status/modules/contrib/keyboard-language-v2.py

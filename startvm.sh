@@ -3,7 +3,7 @@
 set -euo pipefail
 
 qemu-system-x86_64 -boot d \
-    -rtc base=localtime \
+    -rtc base=utc \
     -enable-kvm -m 2048 \
     -drive file=inc,format=qcow2 \
     -drive if=pflash,format=raw,readonly,file=/usr/share/edk2-ovmf/x64/OVMF_CODE.fd \

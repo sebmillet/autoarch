@@ -29,7 +29,7 @@ kernconf: 02 03 04
 gnome: 05 06
 
 05:
-	./cfg-05-gnome-inst.sh
+	sudo ./cfg-05-gnome-inst.sh
 
 06:
 	./cfg-06-gnome-conf.sh
@@ -37,7 +37,11 @@ gnome: 05 06
 i3: 07 08
 
 07:
-	./cfg-07-i3-inst.sh
+	sudo pacman --noconfirm -S i3-wm hsetroot i3lock xautolock numlockx otf-font-awesome dmenu
+	yaourt -a alttab-git
+	yaourt -a bumblebee-status
+	gpg --recv-key 9B8450B91D1362C1
+	yaourt -a j4-dmenu-desktop
 
 08:
 	tar -zxvf cfg-08-i3-conf.tar.gz

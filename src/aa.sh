@@ -150,7 +150,7 @@ fi
     # IMPORTANT
     #   useradd selects zsh as user's shell
 pacman_install='man vim sudo linux-headers linux-lts-headers tmux zsh fzf ' \
-    'openssh base-devel git'
+    'openssh inetutils tree base-devel git sbsigntools'
 
 tz=Europe/Paris
 loc_list=('en_US.UTF-8' 'fr_FR.UTF-8')
