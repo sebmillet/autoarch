@@ -1,0 +1,1 @@
+A few extra GUI packages, for email and web browsing

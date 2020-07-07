@@ -149,8 +149,7 @@ if [ "${docrypt}" == 'y' ]; then
 fi
     # IMPORTANT
     #   useradd selects zsh as user's shell
-pacman_install='man vim sudo linux-headers linux-lts-headers tmux zsh fzf ' \
-    'openssh inetutils tree base-devel git sbsigntools'
+pacman_install='man vim sudo linux-headers linux-lts-headers tmux zsh'
 
 tz=Europe/Paris
 loc_list=('en_US.UTF-8' 'fr_FR.UTF-8')

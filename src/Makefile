@@ -1,63 +1,80 @@
+# Makefile
+# Copyright 2020 Sébastien Millet, milletseb@laposte.net
+
 default:
 	@echo "Run 'make NN' to install/configure element 'NN'"
 
 aa:
 	./aa.sh
 
-cfg-seb: 00
+cfg-seb: 10
 
-00:
-	tar -zxvf cfg-00-seb.tar.gz && \
+10:
+	tar -zxvf cfg-10-seb.tar.gz && \
 		cd cfg-seb && \
 		$(MAKE) install
 
-yaourt: 01
+pkg-extra: 20
 
-01:
-	./cfg-01-yaourt.sh
+20:
+	sudo pacman -S --noconfirm openssh inetutils base-devel git sbsigntools
+	sudo pacman -S --noconfirm fzf tree pydf htop nethogs lsd
+	sudo pacman -S --noconfirm alacritty
 
-kernconf: 02 03 04
+yaourt: 30
 
-02:
-	tar -zxvf cfg-02-uefikeys.tar.gz
+30:
+	./cfg-30-yaourt.sh
+
+kernconf: 40 41 50
+
+40:
+	tar -zxvf cfg-40-uefikeys.tar.gz
 	cd uefikeys && sudo $(MAKE) install
 
-03:
-	tar -zxvf cfg-03-kernsign.tar.gz
+41:
+	tar -zxvf cfg-41-kernsign.tar.gz
 	cd kernsign && sudo $(MAKE) install
 
-04:
-	sudo ./cfg-04-freezpkg.sh
+50:
+	sudo ./cfg-50-freezpkg.sh
 
-gnome: 05 06
+csdcard: 45
 
-05:
-	sudo ./cfg-05-gnome-inst.sh
+45:
+	tar -zxvf cfg-45-csdcard.tar.gz
+	cd csdcard && sudo $(MAKE) install
 
-06:
-	./cfg-06-gnome-conf.sh
+gnome: 60 61
 
-i3: 07 08
+60:
+	sudo pacman --noconfirm -S mesa xf86-video-intel xorg-server xorg-apps
+	sudo pacman --noconfirm -S gnome gnome-extra
 
-07:
+61:
+	./cfg-61-gnome-conf.sh
+
+i3: 70 71
+
+70:
 	sudo pacman --noconfirm -S i3-wm hsetroot i3lock xautolock numlockx otf-font-awesome dmenu
 	yaourt -a alttab-git
 	yaourt -a bumblebee-status
 	gpg --recv-key 9B8450B91D1362C1
 	yaourt -a j4-dmenu-desktop
 
-i3-conf: 08
+i3-conf: 71
 
-08:
-	tar -zxvf cfg-08-i3-conf.tar.gz
+71:
+	tar -zxvf cfg-71-i3-conf.tar.gz
 	cd i3-conf && $(MAKE) install
 
-gui-apps: 09
+pkg-gui: 80
 
-09:
+80:
+	sudo pacman -S gvim
 	sudo pacman -S thunderbird thunderbird-i18n-fr
 	sudo pacman -S firefox firefox-i18n-fr
-	sudo pacman -S alacritty
 
 clean:
 	rm -rf cfg-seb
@@ -66,6 +83,8 @@ clean:
 		chmod +w uefikeys/*; \
 	fi
 	rm -rf uefikeys
+	rm -rf csdcard
 	rm -rf kernsign
 	rm -rf i3-conf
 
+# vim: ts=4:sw=4:tw=80:

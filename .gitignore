@@ -7,3 +7,4 @@ my_uefi_vars.fd
 netctl-profile
 *.tar.gz
 *.key
+sdcard-keyfile

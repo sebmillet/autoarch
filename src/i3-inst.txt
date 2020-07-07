@@ -1,0 +1,6 @@
+Packages to install to get a workable i3
+
+IMPORTANT
+    Video driver is installed at the beginning of GNOME installation
+    i3 installation assumes gnome was installed before
+
