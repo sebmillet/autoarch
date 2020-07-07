@@ -17,9 +17,8 @@ cfg-seb: 10
 pkg-extra: 20
 
 20:
-	sudo pacman -S --noconfirm openssh inetutils base-devel git sbsigntools
+	sudo pacman -S --noconfirm openssh inetutils git sbsigntools base-devel
 	sudo pacman -S --noconfirm fzf tree pydf htop nethogs lsd
-	sudo pacman -S --noconfirm alacritty
 
 yaourt: 30
 
@@ -72,6 +71,7 @@ i3-conf: 71
 pkg-gui: 80
 
 80:
+	sudo pacman -S --noconfirm alacritty
 	sudo pacman -S gvim
 	sudo pacman -S thunderbird thunderbird-i18n-fr
 	sudo pacman -S firefox firefox-i18n-fr

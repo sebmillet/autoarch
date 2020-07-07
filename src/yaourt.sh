@@ -4,8 +4,7 @@
 # terminates) stops the script.
 set -eu
 
-export LANG=''
-mkdir ~/tmp
+mkdir -p ~/tmp
 cd ~/tmp
 
 echo "* ************************************** *"
@@ -15,7 +14,7 @@ echo
 
 git clone https://aur.archlinux.org/package-query.git
 cd package-query
-yes | makepkg -si
+makepkg -si
 cd ..
 
 echo
@@ -26,7 +25,7 @@ echo
 
 git clone https://aur.archlinux.org/yaourt.git
 cd yaourt
-yes | makepkg -si
+makepkg -si
 
 echo
 echo "yaourt successfully installed."

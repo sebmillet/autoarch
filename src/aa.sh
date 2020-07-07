@@ -149,7 +149,7 @@ if [ "${docrypt}" == 'y' ]; then
 fi
     # IMPORTANT
     #   useradd selects zsh as user's shell
-pacman_install='man vim sudo linux-headers linux-lts-headers tmux zsh'
+pacman_install='man vim sudo linux-headers linux-lts-headers tmux zsh make'
 
 tz=Europe/Paris
 loc_list=('en_US.UTF-8' 'fr_FR.UTF-8')
@@ -687,6 +687,8 @@ if [ -z "${kerneluuid}" ]; then
     exit 19
 fi
 
+cp -a . "/mnt/__install"
+
 cat > /mnt/subscript.sh << end-of-file
 #!/usr/bin/bash
 
@@ -788,6 +790,9 @@ chown "${cu_login}": "/home/${cu_login}/bin"
 mkdir "/home/${cu_login}/tmp"
 chown "${cu_login}": "/home/${cu_login}/tmp"
 
+mv /__install "/home/${cu_login}/install"
+chown -R "${cu_login}": "/home/${cu_login}/install"
+
 sed -i 's/# %wheel ALL=(ALL) ALL/%wheel ALL=(ALL) ALL/' /etc/sudoers
 if [ \$(grep -c '^%wheel ALL=(ALL) ALL$' /etc/sudoers) -ne 1 ]; then
     echo "Error: /etc/sudoers update error"
@@ -799,6 +804,7 @@ else
     echo "Update of ${cu_login} password"
     passwd sebastien
 fi
+passwd -l root
 
 echo 'subscript terminated'
 end-of-file
@@ -826,8 +832,6 @@ fi
 if [ "${do_postinst}" == "y" ]; then
 
 echo "${netctl_cfg_postinst}" > "/mnt/etc/netctl/${netctl_profile}"
-
-cp "${0:-}" "/mnt/home/${cu_login}/."
 
 echo "== POSTINST: OK"
 touch .do_postinst_done
