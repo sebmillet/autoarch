@@ -2,6 +2,8 @@
 
 set -euo pipefail
 
+cd local
+
 qemu-system-x86_64 -boot d \
     -rtc base=utc \
     -enable-kvm -m 2048 \

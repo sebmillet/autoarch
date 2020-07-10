@@ -1,10 +1,4 @@
-.vimrc
-*.iso
-*.iso.sig
-disk
-inc
-my_uefi_vars.fd
-netctl-profile
-*.tar.gz
+local/*
+IN*.tgz
 *.key
-sdcard-keyfile
+csdcard/sdcard-keyfile

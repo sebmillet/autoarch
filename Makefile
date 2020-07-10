@@ -1,6 +1,26 @@
 default: dist
 
+uefikeys/Makefile: src/uefikeys-Makefile
+	@read -r -p "$@ needs be updated. Run 'sudo make update'? (y/N) " resp; \
+	if [ "$$resp" != "y" ]; then \
+		echo "Aborted."; \
+		exit 10; \
+	fi
+	sudo $(MAKE) update
+
+csdcard/Makefile: src/csdcard-Makefile
+	@read -r -p "$@ needs be updated. Run 'sudo make update'? (y/N) " resp; \
+	if [ "$$resp" != "y" ]; then \
+		echo "Aborted."; \
+		exit 10; \
+	fi
+	sudo $(MAKE) update
+
 update:
+	@if [ "${EUID}" != "0" ]; then \
+		echo "WARNING: target 'update' run as a regular user."; \
+		echo "         Should be launched as root ('sudo make update')"; \
+	fi
 	cp -av /usr/local/etc/uefikeys .
 	chown -R "${SUDO_USER}": uefikeys
 	cp -av src/uefikeys-Makefile uefikeys/Makefile
@@ -8,7 +28,7 @@ update:
 	chown -R "${SUDO_USER}": csdcard
 	cp -av src/csdcard-Makefile csdcard/Makefile
 
-dist:
+dist: uefikeys/Makefile csdcard/Makefile
 	@if [ ! -f uefikeys/Makefile ]; then \
 		echo "Incorrect or missing uefikeys directory:" \
 			 "run 'sudo make update' first"; \
