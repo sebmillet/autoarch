@@ -1,0 +1,17 @@
+2020-07-07 Sébastien Millet <milletseb@laposte.net>
+
+	* aa.sh: now uses reflector to build mirrorlist
+			 Updating existing mirrorlist file was not possible any longer (if
+			 keeping the logic of filtering by countr) as the file content
+			 contains no more comments with country.
+
+	* aa.sh: pacman -S doesn't use --noconfirm option any longer.
+			 This option is a bit risky, sometimes useful options show up and
+			 enforcing a default response is not ideal (yes, I'm now sticking
+			 to the Arch way ;-) ).
+
+	* aa.sh: creates an empty ~/.zshrc to avoid question at first zsh run
+
+2020-06-20 Sébastien Millet <milletseb@laposte.net>
+
+	* Initial

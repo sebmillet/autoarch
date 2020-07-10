@@ -112,7 +112,7 @@ end-of-file
     #      partitionned, still.
 dopart=y
     # Disk to partition, example: /dev/sda
-devdisk=
+devdisk=/dev/sda
 efipartname="EFI System Partition"
 lvmpartname="main"
     # EFI partition, example: /dev/sda1
@@ -130,15 +130,15 @@ rootname=rootfs
     #   n: use devdata in plain
 docrypt=y
     # VERY BAD PRACTICE TO WRITE A PASSWORD HERE! YOU'VE BEEN WARNED
-cryptpwd=
+cryptpwd=1234
 cryptmappername=clvm
     # LVM
 vgname=vol
 
 mirrors_country=France
-mirrors_linerange='2,5'
+reflector_options="--country ${mirrors_country} --latest 5 --sort rate"
     # Number of mirrors at the end of the update. {2,5} has 4 elements.
-linerange_size=4
+linerange_size=5
 
     # IMPORTANT
     #   bootctl setup assumes linux-lts is installed in addition to linux
@@ -570,34 +570,12 @@ if [ "${do_mirrorlist}" == "y" ] && [ -e .do_mirrorlist_done ]; then
 fi
 if [ "${do_mirrorlist}" == "y" ]; then
 
-# FIXME
-# ABOUT THE WAY I CHOOSE MIRRORS
-# The below logic is actually very similar to what I tend to do manually: I
-# select a few servers of my country manually, leave them active and comment out
-# all others. I sometimes activate a few others of different countries nearby,
-# but it is not done below. Obviously this is relevant only if I'm the only one
-# to do this! If this script was to be used by other people, a better logic
-# (like, the use of reflector) had better be implemented.
-# Although this is an amazingly broken approach, it has two advantages: no
-# package installation pre-requisite and no network connection needed.
-
-# mirror selector of the (very) poor man.
-
 if [ ! -f mirrorlist.orig ]; then
     cp -ip /etc/pacman.d/mirrorlist mirrorlist.orig
 fi
-sed 's/^server/#&/i' mirrorlist.orig > mirrorlist.tmp
-{   echo "##################################"; \
-    echo "## Automatically added by aa.sh ##"; \
-    echo "##################################"; } \
-    >> mirrorlist.tmp
-cp -p mirrorlist.tmp /etc/pacman.d/mirrorlist
-sed ':a;N;$!ba;s/\(## '"${mirrors_country}"'\n\)#/\1/ig' mirrorlist.tmp \
-    | grep '^Server' \
-    | sed -n "${mirrors_linerange}"'p' \
-    | sed 's/^.*$/## '"${mirrors_country}"'\n&/g' \
-    >> /etc/pacman.d/mirrorlist
-rm mirrorlist.tmp
+
+    # shellcheck disable=SC2086
+reflector ${reflector_options} --save /etc/pacman.d/mirrorlist
 
 countmirrors=$(grep -ic "^server" < /etc/pacman.d/mirrorlist)
 if [ "${countmirrors}" -ne "${linerange_size}" ]; then
@@ -780,7 +758,7 @@ echo 'root password is: password'
 
 if [ -n "${pacman_install}" ]; then
         # shellcheck disable=SC2086
-    pacman --noconfirm -S ${pacman_install}
+    pacman -S ${pacman_install}
 fi
 
 useradd -d "/home/${cu_login}" -c "${cu_comment}" -m -U -G "${cu_groups}" \
@@ -792,6 +770,8 @@ chown "${cu_login}": "/home/${cu_login}/tmp"
 
 mv /__install "/home/${cu_login}/install"
 chown -R "${cu_login}": "/home/${cu_login}/install"
+
+touch "/home/${cu_login}/.zshrc"
 
 sed -i 's/# %wheel ALL=(ALL) ALL/%wheel ALL=(ALL) ALL/' /etc/sudoers
 if [ \$(grep -c '^%wheel ALL=(ALL) ALL$' /etc/sudoers) -ne 1 ]; then
