@@ -10,8 +10,8 @@ aa:
 cfg-seb: 10
 
 10:
-	tar -zxvf cfg-10-seb.tar.gz && \
-		cd cfg-seb && \
+	tar -zxvf cfg-10-seb-PRIVATE.tar.gz && \
+		cd cfg-seb-PRIVATE && \
 		$(MAKE) install
 
 pkg-extra: 20

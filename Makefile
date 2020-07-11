@@ -49,7 +49,8 @@ dist: uefikeys/Makefile csdcard/Makefile
 	tar -zcvf csdcard.tar.gz csdcard
 	mv csdcard.tar.gz install/cfg-45-csdcard.tar.gz
 	cd ~/travail/svg/configs && $(MAKE)
-	mv ~/travail/svg/configs/cfg-seb.tar.gz install/cfg-10-seb.tar.gz
+	mv ~/travail/svg/configs/cfg-seb-PRIVATE.tar.gz install/cfg-10-seb-PRIVATE.tar.gz
+	mv ~/travail/svg/configs/cfg-seb-PUBLIC.tar.gz install/cfg-10-seb-PUBLIC.tar.gz
 	cd src && tar -zcvf kernsign.tar.gz kernsign
 	mv src/kernsign.tar.gz install/cfg-41-kernsign.tar.gz
 	cp src/freezpkg.sh install/cfg-50-freezpkg.sh
@@ -65,7 +66,15 @@ dist: uefikeys/Makefile csdcard/Makefile
 		rm i3-conf/* && \
 		rmdir i3-conf
 	cp src/pkg-gui.txt install/cfg-80-pkg-gui.txt
-	tar -zcvf IN$(shell date +%y%m%d).tgz install
+	echo $(shell date --iso-8601=seconds) > install/_timestamp
+	tar -zcvf INSTPRIV.tgz --exclude=cfg-10-seb-PUBLIC.tar.gz install
+	sed -i "s/cfg-10-seb-PRIVATE/cfg-10-seb-PUBLIC/" install/Makefile
+	sed -i "s/cfg-seb-PRIVATE/cfg-seb-PUBLIC/" install/Makefile
+	tar -zcvf INSTPUB.tgz --exclude=cfg-10-seb-PRIVATE.tar.gz \
+		--exclude=cfg-40-uefikeys.tar.gz \
+		--exclude=cfg-45-csdcard.tar.gz \
+		install
+	rm -rf install
 
 clean:
 	if [ -e install/Makefile ]; then \
@@ -73,6 +82,8 @@ clean:
 	fi
 	cd ~/travail/svg/configs && $(MAKE) clean
 	rm -rf install
+	rm -f INSTPRIV.tgz
+	rm -f INSTPUB.tgz
 
 mrproper: clean
 	if [ -d uefikeys ]; then chmod u+w uefikeys; fi
