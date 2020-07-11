@@ -67,6 +67,7 @@ dist: uefikeys/Makefile csdcard/Makefile
 		rmdir i3-conf
 	cp src/pkg-gui.txt install/cfg-80-pkg-gui.txt
 	echo $(shell date --iso-8601=seconds) > install/_timestamp
+	touch install/.autoarch-install-directory
 	tar -zcvf INSTPRIV.tgz --exclude=cfg-10-seb-PUBLIC.tar.gz install
 	sed -i "s/cfg-10-seb-PRIVATE/cfg-10-seb-PUBLIC/" install/Makefile
 	sed -i "s/cfg-seb-PRIVATE/cfg-seb-PUBLIC/" install/Makefile

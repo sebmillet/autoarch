@@ -17,8 +17,8 @@ cfg-seb: 10
 pkg-extra: 20
 
 20:
-	sudo pacman -S --noconfirm openssh inetutils git sbsigntools base-devel
-	sudo pacman -S --noconfirm fzf tree pydf htop nethogs lsd
+	sudo pacman -S openssh inetutils git sbsigntools base-devel
+	sudo pacman -S fzf tree pydf htop nethogs lsd
 
 yaourt: 30
 
@@ -47,8 +47,14 @@ csdcard: 45
 gnome: 60 61
 
 60:
-	sudo pacman --noconfirm -S mesa xf86-video-intel xorg-server xorg-apps
-	sudo pacman --noconfirm -S gnome gnome-extra
+	sudo pacman -S mesa xf86-video-intel xorg-server xorg-apps
+	@echo "Selection recommendations:"
+	@echo "  libjack.so provider, select 2 (jack2)"
+	@echo "  xdg-desktop-portal-impl, select 1 (xdg-desktop-portal-gtk)"
+	@echo "  ttf-font, select 5 (ttf-dejavu)"
+	@echo "Press [Enter] key to continue"
+	@read -r resp
+	sudo pacman -S gnome gnome-extra
 
 61:
 	./cfg-61-gnome-conf.sh
@@ -56,8 +62,12 @@ gnome: 60 61
 i3: 70 71
 
 70:
-	sudo pacman --noconfirm -S i3-wm hsetroot i3lock xautolock numlockx otf-font-awesome dmenu
-	yaourt -a alttab-git
+	sudo pacman -S i3-wm hsetroot i3lock xautolock numlockx otf-font-awesome dmenu
+#     altab-git installation with yaourt produces an error. The commit is:
+#         45816dc7777b63284bd82c49683e7dd6d9955571
+#         of 2020-04-21
+#     This comment was written 2020-07-11
+#     yaourt -a alttab-git
 	yaourt -a bumblebee-status
 	gpg --recv-key 9B8450B91D1362C1
 	yaourt -a j4-dmenu-desktop
@@ -71,7 +81,7 @@ i3-conf: 71
 pkg-gui: 80
 
 80:
-	sudo pacman -S --noconfirm alacritty
+	sudo pacman -S alacritty
 	sudo pacman -S gvim
 	sudo pacman -S thunderbird thunderbird-i18n-fr
 	sudo pacman -S firefox firefox-i18n-fr

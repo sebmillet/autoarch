@@ -167,7 +167,7 @@ cu_comment="Sébastien Millet"
     # IMPORTANT
     #   The 'wheel' membership is assumed when updating /etc/sudoers
 cu_groups="wheel,audio,kvm,users,systemd-journal"
-cu_password=
+cu_password=1
 
 if [ "${interactive}" == "n" ] && [ -z "${cu_password}" ]; then
     echo "Error: you must provide password of user ${cu_login} if running non"
@@ -665,7 +665,9 @@ if [ -z "${kerneluuid}" ]; then
     exit 19
 fi
 
-cp -a . "/mnt/__install"
+if [ -e ".autoarch-install-directory" ]; then
+    cp -a . "/mnt/__install"
+fi
 
 cat > /mnt/subscript.sh << end-of-file
 #!/usr/bin/bash
@@ -756,9 +758,20 @@ fi
 (echo "password"; echo "password") | passwd
 echo 'root password is: password'
 
+# NOTE
+#   Sending 'y' confirmation instead of executing pacman with --noconfirm is not
+#   a mistake.
+#   We want to just confirm installation.
+#   If we'd execute pacman with --noconfirm, then any selection choice would get
+#   default response and this is not what we want.
+#   To date (Jule 11th), as it turns out, the packages installed as per
+#   package_install variable do NOT trigger a choice selection, but evolution in
+#   Arch packages, and/or, in package_install content, could trigger a choice
+#   selection in the future.
+#   Should that be the case, we DON'T WANT default choice to be made.
 if [ -n "${pacman_install}" ]; then
         # shellcheck disable=SC2086
-    pacman -S ${pacman_install}
+    echo "y" | pacman -S ${pacman_install}
 fi
 
 useradd -d "/home/${cu_login}" -c "${cu_comment}" -m -U -G "${cu_groups}" \
@@ -768,10 +781,13 @@ chown "${cu_login}": "/home/${cu_login}/bin"
 mkdir "/home/${cu_login}/tmp"
 chown "${cu_login}": "/home/${cu_login}/tmp"
 
-mv /__install "/home/${cu_login}/install"
-chown -R "${cu_login}": "/home/${cu_login}/install"
+if [ -e /__install ]; then
+    mv /__install "/home/${cu_login}/install"
+    chown -R "${cu_login}": "/home/${cu_login}/install"
+fi
 
 touch "/home/${cu_login}/.zshrc"
+chown "${cu_login}": "/home/${cu_login}/.zshrc"
 
 sed -i 's/# %wheel ALL=(ALL) ALL/%wheel ALL=(ALL) ALL/' /etc/sudoers
 if [ \$(grep -c '^%wheel ALL=(ALL) ALL$' /etc/sudoers) -ne 1 ]; then
