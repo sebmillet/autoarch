@@ -128,7 +128,7 @@ rootname=rootfs
     # Encrypt devdata?
     #   y: encrypt devdata and create swap and rootfs underneath (with LVM)
     #   n: use devdata in plain
-docrypt=y
+docrypt=n
     # VERY BAD PRACTICE TO WRITE A PASSWORD HERE! YOU'VE BEEN WARNED
 cryptpwd=1234
 cryptmappername=clvm
@@ -142,14 +142,16 @@ linerange_size=5
 
     # IMPORTANT
     #   bootctl setup assumes linux-lts is installed in addition to linux
-pacstrap_install='base linux linux-lts linux-firmware'
+#pacstrap_install='base linux linux-lts linux-firmware'
+pacstrap_install='base linux linux-firmware'
 pacstrap_extra=
 if [ "${docrypt}" == 'y' ]; then
     pacstrap_extra='lvm2'
 fi
     # IMPORTANT
     #   useradd selects zsh as user's shell
-pacman_install='man vim sudo linux-headers linux-lts-headers tmux zsh make'
+#pacman_install='man vim sudo linux-headers linux-lts-headers tmux zsh make'
+pacman_install='man vim sudo linux-headers tmux zsh make'
 
 tz=Europe/Paris
 loc_list=('en_US.UTF-8' 'fr_FR.UTF-8')
@@ -168,6 +170,9 @@ cu_comment="Sébastien Millet"
     #   The 'wheel' membership is assumed when updating /etc/sudoers
 cu_groups="wheel,audio,kvm,users,systemd-journal"
 cu_password=1
+
+github_latest_release_url="https://api.github.com/repos/sebmillet/autoarch/releases/latest"
+github_latest_release_filename=INSTPUB.tgz
 
 if [ "${interactive}" == "n" ] && [ -z "${cu_password}" ]; then
     echo "Error: you must provide password of user ${cu_login} if running non"
@@ -666,8 +671,17 @@ if [ -z "${kerneluuid}" ]; then
 fi
 
 if [ -e ".autoarch-install-directory" ]; then
+    echo "== Current directory appears to be an archive extract."
     cp -a . "/mnt/__install"
+else
+    echo "== Current directory does not appear to be an archive extract."
+    echo "== Downloading latest release archive file."
+    curl -s "${github_latest_release_url}" \
+        | grep "browser_download_url.*${github_latest_release_filename}" \
+        | sed 's/^.*browser_download_url":\s*"\([^"]\+\)"$/\1/' \
+        | xargs curl -L --output "/mnt/${github_latest_release_filename}"
 fi
+cp "${0:-}" /mnt/root/
 
 cat > /mnt/subscript.sh << end-of-file
 #!/usr/bin/bash
@@ -784,6 +798,10 @@ chown "${cu_login}": "/home/${cu_login}/tmp"
 if [ -e /__install ]; then
     mv /__install "/home/${cu_login}/install"
     chown -R "${cu_login}": "/home/${cu_login}/install"
+fi
+if [ -e "/${github_latest_release_filename}" ]; then
+    mv -i "/${github_latest_release_filename}" "/home/${cu_login}/."
+    tar -zxvf "/home/${cu_login}/${github_latest_release_filename}" -C "/home/${cu_login}"
 fi
 
 touch "/home/${cu_login}/.zshrc"
