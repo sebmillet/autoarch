@@ -13,36 +13,43 @@ cfg-seb: 10
 	tar -zxvf cfg-10-seb-PRIVATE.tar.gz && \
 		cd cfg-seb-PRIVATE && \
 		$(MAKE) install
+	touch "$@"
 
 pkg-extra: 20
 
 20:
 	sudo pacman -S openssh inetutils git sbsigntools base-devel
 	sudo pacman -S fzf tree pydf htop nethogs lsd
+	touch "$@"
 
 yaourt: 30
 
 30:
 	./cfg-30-yaourt.sh
+	touch "$@"
 
 kernconf: 40 41 50
 
 40:
 	tar -zxvf cfg-40-uefikeys.tar.gz
 	cd uefikeys && sudo $(MAKE) install
+	touch "$@"
 
 41:
 	tar -zxvf cfg-41-kernsign.tar.gz
 	cd kernsign && sudo $(MAKE) install
+	touch "$@"
 
 50:
 	sudo ./cfg-50-freezpkg.sh
+	touch "$@"
 
 csdcard: 45
 
 45:
 	tar -zxvf cfg-45-csdcard.tar.gz
 	cd csdcard && sudo $(MAKE) install
+	touch "$@"
 
 gnome: 60 61
 
@@ -55,9 +62,11 @@ gnome: 60 61
 	@echo "Press [Enter] key to continue"
 	@read -r resp
 	sudo pacman -S gnome gnome-extra
+	touch "$@"
 
 61:
 	./cfg-61-gnome-conf.sh
+	touch "$@"
 
 i3: 70 71
 
@@ -71,12 +80,14 @@ i3: 70 71
 	yaourt -a bumblebee-status
 	gpg --recv-key 9B8450B91D1362C1
 	yaourt -a j4-dmenu-desktop
+	touch "$@"
 
 i3-conf: 71
 
 71:
 	tar -zxvf cfg-71-i3-conf.tar.gz
 	cd i3-conf && $(MAKE) install
+	touch "$@"
 
 pkg-gui: 80
 
@@ -85,6 +96,7 @@ pkg-gui: 80
 	sudo pacman -S gvim
 	sudo pacman -S thunderbird thunderbird-i18n-fr
 	sudo pacman -S firefox firefox-i18n-fr
+	touch "$@"
 
 clean:
 	rm -rf cfg-seb
@@ -96,5 +108,6 @@ clean:
 	rm -rf csdcard
 	rm -rf kernsign
 	rm -rf i3-conf
+	rm -f [0-9][0-9]
 
 # vim: ts=4:sw=4:tw=80:

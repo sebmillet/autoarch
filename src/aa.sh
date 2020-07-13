@@ -672,7 +672,8 @@ fi
 
 if [ -e ".autoarch-install-directory" ]; then
     echo "== Current directory appears to be an archive extract."
-    cp -a . "/mnt/__install"
+    cp -a . /mnt/__install
+    rm -f /mnt/__install/.do_*
 else
     echo "== Current directory does not appear to be an archive extract."
     echo "== Downloading latest release archive file."

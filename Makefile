@@ -1,4 +1,4 @@
-default: dist
+default: install
 
 uefikeys/Makefile: src/uefikeys-Makefile
 	@read -r -p "$@ needs be updated. Run 'sudo make update'? (y/N) " resp; \
@@ -28,7 +28,9 @@ update:
 	chown -R "${SUDO_USER}": csdcard
 	cp -av src/csdcard-Makefile csdcard/Makefile
 
-dist: uefikeys/Makefile csdcard/Makefile
+install/.autoarch-install-directory: install
+
+install: uefikeys/Makefile csdcard/Makefile
 	@if [ ! -f uefikeys/Makefile ]; then \
 		echo "Incorrect or missing uefikeys directory:" \
 			 "run 'sudo make update' first"; \
@@ -68,14 +70,23 @@ dist: uefikeys/Makefile csdcard/Makefile
 	cp src/pkg-gui.txt install/cfg-80-pkg-gui.txt
 	echo $(shell date --iso-8601=seconds) > install/_timestamp
 	touch install/.autoarch-install-directory
+
+dist: INSTPRIV.tgz INSTPUB.tgz
+
+INSTPRIV.tgz: install/.autoarch-install-directory
 	tar -zcvf INSTPRIV.tgz --exclude=cfg-10-seb-PUBLIC.tar.gz install
+
+INSTPUB.tgz: install/.autoarch-install-directory
+	cp -i install/Makefile Makefile.orig
 	sed -i "s/cfg-10-seb-PRIVATE/cfg-10-seb-PUBLIC/" install/Makefile
 	sed -i "s/cfg-seb-PRIVATE/cfg-seb-PUBLIC/" install/Makefile
 	tar -zcvf INSTPUB.tgz --exclude=cfg-10-seb-PRIVATE.tar.gz \
 		--exclude=cfg-40-uefikeys.tar.gz \
 		--exclude=cfg-45-csdcard.tar.gz \
 		install
-	rm -rf install
+	mv Makefile.orig install/Makefile
+
+.PHONY: clean distclean mrproper
 
 clean:
 	if [ -e install/Makefile ]; then \
@@ -83,10 +94,12 @@ clean:
 	fi
 	cd ~/travail/svg/configs && $(MAKE) clean
 	rm -rf install
+
+distclean: clean
 	rm -f INSTPRIV.tgz
 	rm -f INSTPUB.tgz
 
-mrproper: clean
+mrproper: clean distclean
 	if [ -d uefikeys ]; then chmod u+w uefikeys; fi
 	rm -rf uefikeys
 	if [ -d csdcard ]; then chmod u+w csdcard; fi
