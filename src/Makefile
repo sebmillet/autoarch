@@ -18,8 +18,12 @@ cfg-seb: 10
 pkg-extra: 20
 
 20:
-	sudo pacman -S openssh inetutils git sbsigntools base-devel
+	sudo pacman -S openssh inetutils git sbsigntools base-devel pacman-contrib
 	sudo pacman -S fzf tree pydf htop nethogs lsd
+	sudo pacman -S shellcheck efitools sbsigntool the_silver_searcher gnu-efi \
+		cpanminus pandoc tldr
+	tldr -u
+	LANG='' tldr -u
 	touch "$@"
 
 yaourt: 30
@@ -31,7 +35,7 @@ yaourt: 30
 kernconf: 40 41 50
 
 40:
-	tar -zxvf cfg-40-uefikeys.tar.gz
+	tar -zxvf cfg-40-uefikeys-PRIVATE.tar.gz
 	cd uefikeys && sudo $(MAKE) install
 	touch "$@"
 
@@ -47,8 +51,19 @@ kernconf: 40 41 50
 csdcard: 45
 
 45:
-	tar -zxvf cfg-45-csdcard.tar.gz
+	tar -zxvf cfg-45-csdcard-PRIVATE.tar.gz
 	cd csdcard && sudo $(MAKE) install
+	touch "$@"
+
+postfix: 55 56
+
+55:
+	sudo pacman -S s-nail postfix
+	touch "$@"
+
+56:
+	sudo tar -zxvf cfg-56-postfix-PRIVATE.tar.gz
+	cd postfix && sudo $(MAKE) configure
 	touch "$@"
 
 gnome: 60 61

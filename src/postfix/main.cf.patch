@@ -1,0 +1,70 @@
+--- main.cf.orig	2020-07-13 15:10:33.289999991 +0200
++++ main.cf	2020-07-13 15:07:37.353333335 +0200
+@@ -91,7 +91,7 @@
+ # from gethostname(). $myhostname is used as a default value for many
+ # other configuration parameters.
+ #
+-#myhostname = host.domain.tld
++myhostname = maison-arch
+ #myhostname = virtual.domain.tld
+ 
+ # The mydomain parameter specifies the local internet domain name.
+@@ -131,7 +131,7 @@
+ #
+ #inet_interfaces = all
+ #inet_interfaces = $myhostname
+-#inet_interfaces = $myhostname, localhost
++inet_interfaces = $myhostname, localhost
+ 
+ # The proxy_interfaces parameter specifies the network interface
+ # addresses that this mail system receives mail on by way of a
+@@ -180,6 +180,7 @@
+ #mydestination = $myhostname, localhost.$mydomain, localhost, $mydomain
+ #mydestination = $myhostname, localhost.$mydomain, localhost, $mydomain,
+ #	mail.$mydomain, www.$mydomain, ftp.$mydomain
++mydestination = $myhostname, maison-arch, localhost.localdomain, localhost
+ 
+ # REJECTING MAIL FOR UNKNOWN LOCAL USERS
+ #
+@@ -249,7 +250,7 @@
+ #
+ # By default (mynetworks_style = subnet), Postfix "trusts" SMTP
+ # clients in the same IP subnetworks as the local machine.
+-# On Linux, this works correctly only with interfaces specified
++# On Linux, this does works correctly only with interfaces specified
+ # with the "ifconfig" command.
+ # 
+ # Specify "mynetworks_style = class" when Postfix should "trust" SMTP
+@@ -401,7 +402,7 @@
+ #alias_maps = hash:/etc/aliases
+ #alias_maps = hash:/etc/aliases, nis:mail.aliases
+ #alias_maps = netinfo:/aliases
+-alias_maps = hash:/etc/postfix/aliases
++alias_maps = hash:/etc/aliases
+ 
+ # The alias_database parameter specifies the alias database(s) that
+ # are built with "newaliases" or "sendmail -bi".  This is a separate
+@@ -567,7 +568,7 @@
+ # You MUST specify $myhostname at the start of the text. That is an
+ # RFC requirement. Postfix itself does not care.
+ #
+-#smtpd_banner = $myhostname ESMTP $mail_name
++smtpd_banner = $myhostname ESMTP $mail_name
+ #smtpd_banner = $myhostname ESMTP $mail_name ($mail_version)
+ 
+ # PARALLEL DELIVERY TO THE SAME DESTINATION
+@@ -678,3 +679,14 @@
+ inet_protocols = ipv4
+ meta_directory = /etc/postfix
+ shlib_directory = /usr/lib/postfix
++
++recipient_canonical_maps = hash:/etc/postfix/sender_canonical
++sender_canonical_maps = hash:/etc/postfix/sender_canonical
++
++relayhost = [smtp.laposte.net]:465
++smtp_sasl_auth_enable = yes
++smtp_sasl_password_maps = hash:/etc/postfix/passwd
++smtp_sasl_security_options =
++smtp_tls_wrappermode = yes
++smtp_tls_security_level = encrypt
++

@@ -2,3 +2,4 @@ local/*
 IN*.tgz
 *.key
 csdcard/sdcard-keyfile
+passwd

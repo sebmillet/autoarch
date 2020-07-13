@@ -1,5 +1,7 @@
 default: install
 
+.PHONY: update dist clean distclean mrproper
+
 uefikeys/Makefile: src/uefikeys-Makefile
 	@read -r -p "$@ needs be updated. Run 'sudo make update'? (y/N) " resp; \
 	if [ "$$resp" != "y" ]; then \
@@ -47,15 +49,18 @@ install: uefikeys/Makefile csdcard/Makefile
 	cp src/pkg-extra.txt install/cfg-20-pkg-extra.txt
 	cp src/yaourt.sh install/cfg-30-yaourt.sh
 	tar -zcvf uefikeys.tar.gz uefikeys
-	mv uefikeys.tar.gz install/cfg-40-uefikeys.tar.gz
+	mv uefikeys.tar.gz install/cfg-40-uefikeys-PRIVATE.tar.gz
 	tar -zcvf csdcard.tar.gz csdcard
-	mv csdcard.tar.gz install/cfg-45-csdcard.tar.gz
+	mv csdcard.tar.gz install/cfg-45-csdcard-PRIVATE.tar.gz
 	cd ~/travail/svg/configs && $(MAKE)
 	mv ~/travail/svg/configs/cfg-seb-PRIVATE.tar.gz install/cfg-10-seb-PRIVATE.tar.gz
 	mv ~/travail/svg/configs/cfg-seb-PUBLIC.tar.gz install/cfg-10-seb-PUBLIC.tar.gz
 	cd src && tar -zcvf kernsign.tar.gz kernsign
 	mv src/kernsign.tar.gz install/cfg-41-kernsign.tar.gz
 	cp src/freezpkg.sh install/cfg-50-freezpkg.sh
+	cd src && tar -zcvf postfix.tar.gz postfix
+	cp src/postfix-inst.txt install/cfg-55-postfix-inst.txt
+	mv src/postfix.tar.gz install/cfg-56-postfix-PRIVATE.tar.gz
 	cp src/gnome-inst.txt install/cfg-60-gnome-inst.txt
 	cp src/gnome-conf.pseudo_sh install/cfg-61-gnome-conf.sh
 	./manage-includes.sh install/cfg-61-gnome-conf.sh
@@ -80,13 +85,12 @@ INSTPUB.tgz: install/.autoarch-install-directory
 	cp -i install/Makefile Makefile.orig
 	sed -i "s/cfg-10-seb-PRIVATE/cfg-10-seb-PUBLIC/" install/Makefile
 	sed -i "s/cfg-seb-PRIVATE/cfg-seb-PUBLIC/" install/Makefile
-	tar -zcvf INSTPUB.tgz --exclude=cfg-10-seb-PRIVATE.tar.gz \
-		--exclude=cfg-40-uefikeys.tar.gz \
-		--exclude=cfg-45-csdcard.tar.gz \
-		install
+	echo "not part of public archive" > install/cfg-40-uefikeys.txt
+	echo "not part of public archive" > install/cfg-45-csdcard.txt
+	echo "not part of public archive" > install/cfg-56-postfix.txt
+	tar -zcvf INSTPUB.tgz --exclude="*-PRIVATE*" install
+	rm install/cfg-40-uefikeys.txt install/cfg-45-csdcard.txt install/cfg-56-postfix.txt
 	mv Makefile.orig install/Makefile
-
-.PHONY: clean distclean mrproper
 
 clean:
 	if [ -e install/Makefile ]; then \
