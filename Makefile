@@ -1,6 +1,6 @@
 default: install
 
-.PHONY: update dist clean distclean mrproper
+.PHONY: update install dist clean distclean mrproper
 
 uefikeys/Makefile: src/uefikeys-Makefile
 	@read -r -p "$@ needs be updated. Run 'sudo make update'? (y/N) " resp; \
@@ -46,6 +46,7 @@ install: uefikeys/Makefile csdcard/Makefile
 	mkdir -p install
 	cp src/Makefile install/
 	cp src/aa.sh install/
+	cp src/network.txt install/cfg-15-network.txt
 	cp src/pkg-extra.txt install/cfg-20-pkg-extra.txt
 	cp src/yaourt.sh install/cfg-30-yaourt.sh
 	tar -zcvf uefikeys.tar.gz uefikeys

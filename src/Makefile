@@ -15,12 +15,17 @@ cfg-seb: 10
 		$(MAKE) install
 	touch "$@"
 
+15:
+	sudo netctl start main
+	sudo netctl enable main
+	touch "$@"
+
 pkg-extra: 20
 
 20:
 	sudo pacman -S openssh inetutils git sbsigntools base-devel pacman-contrib
 	sudo pacman -S fzf tree pydf htop nethogs lsd
-	sudo pacman -S shellcheck efitools sbsigntool the_silver_searcher gnu-efi \
+	sudo pacman -S shellcheck efitools the_silver_searcher gnu-efi \
 		cpanminus pandoc tldr
 	tldr -u
 	LANG='' tldr -u

@@ -128,7 +128,7 @@ rootname=rootfs
     # Encrypt devdata?
     #   y: encrypt devdata and create swap and rootfs underneath (with LVM)
     #   n: use devdata in plain
-docrypt=n
+docrypt=y
     # VERY BAD PRACTICE TO WRITE A PASSWORD HERE! YOU'VE BEEN WARNED
 cryptpwd=1234
 cryptmappername=clvm
@@ -819,6 +819,8 @@ else
     echo "Update of ${cu_login} password"
     passwd sebastien
 fi
+chsh -s /usr/bin/zsh
+touch /root/.zshrc
 passwd -l root
 
 echo 'subscript terminated'
