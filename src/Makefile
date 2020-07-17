@@ -67,7 +67,11 @@ postfix: 55 56
 	touch "$@"
 
 56:
-	sudo tar -zxvf cfg-56-postfix-PRIVATE.tar.gz
+	if [ -e cfg-56-postfix-PRIVATE.tar.gz ]; then \
+		sudo tar -zxvf cfg-56-postfix-PRIVATE.tar.gz; \
+	else \
+		sudo tar -zxvf cfg-56-postfix-PUBLIC.tar.gz; \
+	fi
 	cd postfix && sudo $(MAKE) configure
 	touch "$@"
 

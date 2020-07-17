@@ -89,7 +89,7 @@ install: uefikeys/Makefile csdcard/Makefile
 dist: INSTPRIV.tgz INSTPUB.tgz
 
 INSTPRIV.tgz: install/.autoarch-install-directory
-	tar -zcvf INSTPRIV.tgz --exclude=cfg-10-seb-PUBLIC.tar.gz install
+	tar -zcvf INSTPRIV.tgz --exclude="*-PUBLIC*" install
 
 INSTPUB.tgz: install/.autoarch-install-directory
 	cp -i install/Makefile Makefile.orig
@@ -97,9 +97,8 @@ INSTPUB.tgz: install/.autoarch-install-directory
 	sed -i "s/cfg-seb-PRIVATE/cfg-seb-PUBLIC/" install/Makefile
 	echo "not part of public archive" > install/cfg-40-uefikeys.txt
 	echo "not part of public archive" > install/cfg-45-csdcard.txt
-	echo "not part of public archive" > install/cfg-56-postfix.txt
 	tar -zcvf INSTPUB.tgz --exclude="*-PRIVATE*" install
-	rm install/cfg-40-uefikeys.txt install/cfg-45-csdcard.txt install/cfg-56-postfix.txt
+	rm install/cfg-40-uefikeys.txt install/cfg-45-csdcard.txt
 	mv Makefile.orig install/Makefile
 
 clean:
