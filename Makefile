@@ -1,6 +1,6 @@
 default: install
 
-.PHONY: update install dist clean distclean mrproper
+.PHONY: update dist clean distclean mrproper
 
 uefikeys/Makefile: src/uefikeys-Makefile
 	@read -r -p "$@ needs be updated. Run 'sudo make update'? (y/N) " resp; \
@@ -53,15 +53,24 @@ install: uefikeys/Makefile csdcard/Makefile
 	mv uefikeys.tar.gz install/cfg-40-uefikeys-PRIVATE.tar.gz
 	tar -zcvf csdcard.tar.gz csdcard
 	mv csdcard.tar.gz install/cfg-45-csdcard-PRIVATE.tar.gz
-	cd ~/travail/svg/configs && $(MAKE)
-	mv ~/travail/svg/configs/cfg-seb-PRIVATE.tar.gz install/cfg-10-seb-PRIVATE.tar.gz
-	mv ~/travail/svg/configs/cfg-seb-PUBLIC.tar.gz install/cfg-10-seb-PUBLIC.tar.gz
+	cd configs && $(MAKE)
+	mv configs/cfg-seb-PRIVATE.tar.gz install/cfg-10-seb-PRIVATE.tar.gz
+	mv configs/cfg-seb-PUBLIC.tar.gz install/cfg-10-seb-PUBLIC.tar.gz
 	cd src && tar -zcvf kernsign.tar.gz kernsign
 	mv src/kernsign.tar.gz install/cfg-41-kernsign.tar.gz
 	cp src/freezpkg.sh install/cfg-50-freezpkg.sh
-	cd src && tar -zcvf postfix.tar.gz postfix
-	cp src/postfix-inst.txt install/cfg-55-postfix-inst.txt
-	mv src/postfix.tar.gz install/cfg-56-postfix-PRIVATE.tar.gz
+	cd src && tar -zcvf postfix-PRIVATE.tar.gz --exclude=passwd-fake postfix
+	mv src/postfix-PRIVATE.tar.gz install/cfg-56-postfix-PRIVATE.tar.gz
+	mv -i src/postfix/Makefile src/postfix-PRIVATE-Makefile
+	cp -i src/postfix-PUBLIC-Makefile src/postfix/Makefile
+	mv -i src/postfix/passwd src/postfix/passwd-prod
+	cp -i src/postfix/passwd-fake src/postfix/passwd
+	cd src && tar -zcvf postfix-PUBLIC.tar.gz --exclude=passwd-prod --exclude=passwd-fake postfix
+	mv src/postfix-PUBLIC.tar.gz install/cfg-56-postfix-PUBLIC.tar.gz
+	rm src/postfix/passwd
+	mv -i src/postfix/passwd-prod src/postfix/passwd
+	rm src/postfix/Makefile
+	mv -i src/postfix-PRIVATE-Makefile src/postfix/Makefile
 	cp src/gnome-inst.txt install/cfg-60-gnome-inst.txt
 	cp src/gnome-conf.pseudo_sh install/cfg-61-gnome-conf.sh
 	./manage-includes.sh install/cfg-61-gnome-conf.sh
@@ -97,7 +106,7 @@ clean:
 	if [ -e install/Makefile ]; then \
 		cd install && $(MAKE) clean; \
 	fi
-	cd ~/travail/svg/configs && $(MAKE) clean
+	cd configs && $(MAKE) clean
 	rm -rf install
 
 distclean: clean
