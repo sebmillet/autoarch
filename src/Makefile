@@ -1,17 +1,35 @@
 # Makefile
 # Copyright 2020 Sébastien Millet, milletseb@laposte.net
 
-default:
-	@echo "Run 'make NN' to install/configure element 'NN'"
+has_private_content=yes
+qualifier=PRIVATE
+ifeq ($(wildcard .private),)
+	has_private_content=no
+	qualifier=PUBLIC
+endif
+
+cli=10 15 20 30
+ifeq ($(has_private_content), yes)
+	cli+=40 41 45
+endif
+cli+=50 55 56
+
+all: cli gui
+
+gui=60 61 70 71 80
 
 aa:
 	./aa.sh
 
+cli: $(cli)
+
+gui: $(gui)
+
 cfg-seb: 10
 
 10:
-	tar -zxvf cfg-10-seb-PRIVATE.tar.gz && \
-		cd cfg-seb-PRIVATE && \
+	tar -zxvf cfg-10-seb-$(qualifier).tar.gz && \
+		cd cfg-seb-$(qualifier) && \
 		$(MAKE) install
 	touch "$@"
 
@@ -25,6 +43,7 @@ pkg-extra: 20
 20:
 	sudo pacman -S openssh inetutils git sbsigntools base-devel pacman-contrib
 	sudo pacman -S fzf tree pydf htop nethogs lsd
+	sudo pacman -S mlocate
 	sudo pacman -S shellcheck efitools the_silver_searcher gnu-efi \
 		cpanminus pandoc tldr
 	tldr -u

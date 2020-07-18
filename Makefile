@@ -87,20 +87,18 @@ install: uefikeys/Makefile csdcard/Makefile
 	echo $(shell date --iso-8601=seconds) > install/_timestamp
 	touch install/.autoarch-install-directory
 
-dist: INSTPRIV.tgz INSTPUB.tgz
+dist: INSTPUB.tgz INSTPRIV.tgz
 
 INSTPRIV.tgz: install/.autoarch-install-directory
+	touch install/.private
 	tar -zcvf INSTPRIV.tgz --exclude="*-PUBLIC*" install
 
 INSTPUB.tgz: install/.autoarch-install-directory
-	cp -i install/Makefile Makefile.orig
-	sed -i "s/cfg-10-seb-PRIVATE/cfg-10-seb-PUBLIC/" install/Makefile
-	sed -i "s/cfg-seb-PRIVATE/cfg-seb-PUBLIC/" install/Makefile
+	rm -f install/.private
 	echo "not part of public archive" > install/cfg-40-uefikeys.txt
 	echo "not part of public archive" > install/cfg-45-csdcard.txt
 	tar -zcvf INSTPUB.tgz --exclude="*-PRIVATE*" install
 	rm install/cfg-40-uefikeys.txt install/cfg-45-csdcard.txt
-	mv Makefile.orig install/Makefile
 
 clean:
 	if [ -e install/Makefile ]; then \
