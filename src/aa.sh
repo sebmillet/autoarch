@@ -142,16 +142,14 @@ linerange_size=5
 
     # IMPORTANT
     #   bootctl setup assumes linux-lts is installed in addition to linux
-#pacstrap_install='base linux linux-lts linux-firmware'
-pacstrap_install='base linux linux-firmware'
+pacstrap_install='base linux linux-lts linux-firmware'
 pacstrap_extra=
 if [ "${docrypt}" == 'y' ]; then
     pacstrap_extra='lvm2'
 fi
     # IMPORTANT
     #   useradd selects zsh as user's shell
-#pacman_install='man vim sudo linux-headers linux-lts-headers tmux zsh make'
-pacman_install='man vim sudo linux-headers tmux zsh make'
+pacman_install='man vim sudo linux-headers linux-lts-headers tmux zsh make'
 
 tz=Europe/Paris
 loc_list=('en_US.UTF-8' 'fr_FR.UTF-8')
