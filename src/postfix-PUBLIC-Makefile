@@ -17,12 +17,19 @@ configure:
 	chmod 600 /etc/postfix/sender_canonical*
 	systemctl enable postfix.service
 	systemctl restart postfix.service
-	@echo "* ****************************************** *"
-	@echo "* Public postfix configuration archive used. *"
-	@echo "* You must update the file                   *"
-	@echo "*   /etc/postfix/passwd                      *"
-	@echo "* with the proper account and password, then *"
-	@echo "* run postmap as an admin, that is:          *"
-	@echo "*   sudo postmap hash:/etc/postfix/passwd    *"
-	@echo "* ****************************************** *"
+	@echo "* **************************************** *"
+	@echo "* Public postfix config archive used.      *"
+	@echo "* You must do as follows:                  *"
+	@echo "*                                          *"
+	@echo "* 1. update the file                       *"
+	@echo "*   /etc/postfix/passwd                    *"
+	@echo "* with proper account and password.        *"
+	@echo "*                                          *"
+	@echo "* 2. run postmap as an admin:              *"
+	@echo "*   sudo postmap hash:/etc/postfix/passwd  *"
+	@echo "*                                          *"
+	@echo "* 3. Restart postfix service:              *"
+	@echo "*   sudo systemctl restart postfix.service *"
+	@echo "*                                          *"
+	@echo "* **************************************** *"
 
