@@ -1,0 +1,29 @@
+#!/bin/bash
+
+# recfilestats
+
+# Sébastien Millet, Mars 2018
+# Crée un fichier frecord pour le répertoire travail
+
+set -e
+
+FRECORD=/home/sebastien/travail/scripts/frecord/frecord.pl
+
+SOURCE=(
+	"/home/sebastien/travail"
+)
+
+TARGET=/home/sebastien/travail/svg
+
+for dirfullname in "${SOURCE[@]}"; do
+	dirname=$(basename "$dirfullname")
+	prev_targetfullname="${TARGET}/${dirname}-prev.frecord"
+	targetfullname="${TARGET}/${dirname}.frecord"
+	if [ -f "$targetfullname" ]; then
+		mv "$targetfullname" "$prev_targetfullname"
+	fi
+	echo "$dirfullname => [$targetfullname]"
+
+	$FRECORD -b -n -o "$targetfullname" "$dirfullname"
+done
+

@@ -56,22 +56,24 @@ install: uefikeys/Makefile csdcard/Makefile
 	cd configs && $(MAKE)
 	mv configs/cfg-seb-PRIVATE.tar.gz install/cfg-10-seb-PRIVATE.tar.gz
 	mv configs/cfg-seb-PUBLIC.tar.gz install/cfg-10-seb-PUBLIC.tar.gz
-	cd src && tar -zcvf kernsign.tar.gz kernsign
+	cd src && tar -h -zcvf kernsign.tar.gz kernsign
 	mv src/kernsign.tar.gz install/cfg-41-kernsign.tar.gz
 	cp src/freezpkg.sh install/cfg-50-freezpkg.sh
 	cp src/postfix-inst.txt install/cfg-55-postfix-inst.txt
-	cd src && tar -zcvf postfix-PRIVATE.tar.gz --exclude=passwd-fake postfix
+	cd src && tar -h -zcvf postfix-PRIVATE.tar.gz --exclude=passwd-fake postfix
 	mv src/postfix-PRIVATE.tar.gz install/cfg-56-postfix-PRIVATE.tar.gz
 	mv -i src/postfix/Makefile src/postfix-PRIVATE-Makefile
 	cp -i src/postfix-PUBLIC-Makefile src/postfix/Makefile
 	mv -i src/postfix/passwd src/postfix/passwd-prod
 	cp -i src/postfix/passwd-fake src/postfix/passwd
-	cd src && tar -zcvf postfix-PUBLIC.tar.gz --exclude=passwd-prod --exclude=passwd-fake postfix
+	cd src && tar -h -zcvf postfix-PUBLIC.tar.gz --exclude=passwd-prod --exclude=passwd-fake postfix
 	mv src/postfix-PUBLIC.tar.gz install/cfg-56-postfix-PUBLIC.tar.gz
 	rm src/postfix/passwd
 	mv -i src/postfix/passwd-prod src/postfix/passwd
 	rm src/postfix/Makefile
 	mv -i src/postfix-PRIVATE-Makefile src/postfix/Makefile
+	cd src && tar -h -zcvf autosvg.tar.gz autosvg
+	mv src/autosvg.tar.gz install/cfg-58-autosvg.tar.gz
 	cp src/gnome-inst.txt install/cfg-60-gnome-inst.txt
 	cp src/gnome-conf.pseudo_sh install/cfg-61-gnome-conf.sh
 	./manage-includes.sh install/cfg-61-gnome-conf.sh

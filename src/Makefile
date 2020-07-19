@@ -12,7 +12,7 @@ cli=10 15 20 30
 ifeq ($(has_private_content), yes)
 	cli+=40 41 45
 endif
-cli+=50 55 56
+cli+=50 55 56 58
 
 all: cli gui
 
@@ -92,6 +92,11 @@ postfix: 55 56
 		sudo tar -zxvf cfg-56-postfix-PUBLIC.tar.gz; \
 	fi
 	cd postfix && sudo $(MAKE) configure
+	touch "$@"
+
+58:
+	tar -zxvf cfg-58-autosvg.tar.gz
+	cd autosvg && sudo $(MAKE) configure
 	touch "$@"
 
 gnome: 60 61

@@ -1,0 +1,4 @@
+- pagefile.sys
+- System Volume Information
+- .cache/*
+- **/Cache

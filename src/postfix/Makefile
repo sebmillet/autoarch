@@ -14,7 +14,7 @@ configure:
 	postmap hash:/etc/postfix/passwd
 	postmap hash:/etc/postfix/sender_canonical
 	chmod 600 /etc/postfix/passwd*
-	chmod 600 /etc/postfix/sender_canonical*
+	chmod 644 /etc/postfix/sender_canonical*
 	systemctl enable postfix.service
 	systemctl restart postfix.service
 
