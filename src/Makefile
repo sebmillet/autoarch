@@ -12,7 +12,7 @@ cli=10 15 20 30
 ifeq ($(has_private_content), yes)
 	cli+=40 41 45
 endif
-cli+=50 52 55 56 58
+cli+=50 52 55 56 57 58
 
 all: cli gui
 
@@ -44,6 +44,7 @@ pkg-extra: 20
 	sudo pacman -S openssh inetutils git sbsigntools base-devel pacman-contrib
 	sudo pacman -S fzf tree pydf htop nethogs lsd
 	sudo pacman -S mlocate
+	sudo pacman -S veracrypt
 	sudo pacman -S shellcheck efitools the_silver_searcher gnu-efi \
 		cpanminus pandoc tldr
 	tldr -u
@@ -98,6 +99,24 @@ postfix: 55 56
 	cd postfix && sudo $(MAKE) configure
 	touch "$@"
 
+cpanm: 57
+
+57:
+	cpanm List::MoreUtils
+	cpanm Imager
+	cpanm --force Imager::Screenshot
+	cpanm URI::file
+	cpanm DBM::Deep
+	cpanm Proc::ProcessTable
+	cpanm MP3::Tag
+	cpanm GraphViz
+	cpanm Readonly
+	cpanm XML::LibXML
+	cpanm File::Touch
+	cpanm DateTime
+	cpanm Regexp::Common
+	touch "$@"
+
 58:
 	tar -zxvf cfg-58-autosvg.tar.gz
 	cd autosvg && sudo $(MAKE) configure
@@ -146,6 +165,7 @@ pkg-gui: 80
 80:
 	sudo pacman -S alacritty
 	sudo pacman -S gvim
+	sudo pacman -S vlc mplayer
 	sudo pacman -S thunderbird thunderbird-i18n-fr
 	sudo pacman -S firefox firefox-i18n-fr
 	touch "$@"
