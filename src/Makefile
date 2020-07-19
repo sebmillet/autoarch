@@ -36,6 +36,7 @@ cfg-seb: 10
 15:
 	sudo netctl start main
 	sudo netctl enable main
+	sleep 15
 	touch "$@"
 
 pkg-extra: 20
@@ -168,6 +169,9 @@ pkg-gui: 80
 	sudo pacman -S vlc mplayer
 	sudo pacman -S thunderbird thunderbird-i18n-fr
 	sudo pacman -S firefox firefox-i18n-fr
+	sudo pacman -S gwenview
+	balooctl stop
+	balooctl disable
 	touch "$@"
 
 clean:
