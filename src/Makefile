@@ -45,7 +45,6 @@ pkg-extra: 20
 	sudo pacman -S openssh inetutils git sbsigntools base-devel pacman-contrib
 	sudo pacman -S fzf tree pydf htop nethogs lsd
 	sudo pacman -S mlocate
-	sudo pacman -S veracrypt
 	sudo pacman -S shellcheck efitools the_silver_searcher gnu-efi \
 		cpanminus pandoc tldr
 	tldr -u
@@ -166,6 +165,7 @@ pkg-gui: 80
 80:
 	sudo pacman -S alacritty
 	sudo pacman -S gvim
+	sudo pacman -S veracrypt
 	sudo pacman -S vlc mplayer
 	sudo pacman -S thunderbird thunderbird-i18n-fr
 	sudo pacman -S firefox firefox-i18n-fr
