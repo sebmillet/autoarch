@@ -8,11 +8,15 @@ ifeq ($(wildcard .private),)
 	qualifier=PUBLIC
 endif
 
+ifeq ($(noconfirm), 1)
+	optnoconfirm=--noconfirm
+endif
+
 cli=10 15 20 30
 ifeq ($(has_private_content), yes)
 	cli+=40 41 45
 endif
-cli+=50 52 55 56 57 58
+cli+=50 55 56 57 58
 
 all: cli gui
 
@@ -42,10 +46,10 @@ cfg-seb: 10
 pkg-extra: 20
 
 20:
-	sudo pacman -S openssh inetutils git sbsigntools base-devel pacman-contrib
-	sudo pacman -S fzf tree pydf htop nethogs lsd
-	sudo pacman -S mlocate
-	sudo pacman -S shellcheck efitools the_silver_searcher gnu-efi \
+	sudo pacman $(optnoconfirm) -S openssh inetutils git sbsigntools base-devel pacman-contrib unzip
+	sudo pacman $(optnoconfirm) -S fzf tree pydf htop nethogs lsd
+	sudo pacman $(optnoconfirm) -S mlocate
+	sudo pacman $(optnoconfirm) -S shellcheck efitools the_silver_searcher gnu-efi \
 		cpanminus pandoc tldr
 	tldr -u
 	LANG='' tldr -u
@@ -74,8 +78,10 @@ kernconf: 40 41 50
 	touch "$@"
 
 52:
+	gpg --keyserver hkp://keys.gnupg.net:80 --recv-key 6AD860EED4598027
 	yaourt -a zfs-utils
 	yaourt -a zfs-linux-lts
+	touch "$@"
 
 csdcard: 45
 
@@ -87,7 +93,7 @@ csdcard: 45
 postfix: 55 56
 
 55:
-	sudo pacman -S s-nail postfix
+	sudo pacman $(optnoconfirm) -S s-nail postfix
 	touch "$@"
 
 56:
@@ -102,6 +108,7 @@ postfix: 55 56
 cpanm: 57
 
 57:
+	sudo pacman $(optnoconfirm) -S unzip graphviz
 	cpanm List::MoreUtils
 	cpanm Imager
 	cpanm --force Imager::Screenshot
@@ -125,14 +132,16 @@ cpanm: 57
 gnome: 60 61
 
 60:
-	sudo pacman -S mesa xf86-video-intel xorg-server xorg-apps
+	sudo pacman $(optnoconfirm) -S mesa xf86-video-intel xorg-server xorg-apps
 	@echo "Selection recommendations:"
 	@echo "  libjack.so provider, select 2 (jack2)"
 	@echo "  xdg-desktop-portal-impl, select 1 (xdg-desktop-portal-gtk)"
 	@echo "  ttf-font, select 5 (ttf-dejavu)"
 	@echo "Press [Enter] key to continue"
-	@read -r resp
-	sudo pacman -S gnome gnome-extra
+	@if [ "$(noconfirm)" != "1" ]; then \
+		read -r resp; \
+	fi
+	sudo pacman $(optnoconfirm) -S gnome gnome-extra
 	touch "$@"
 
 61:
@@ -142,14 +151,14 @@ gnome: 60 61
 i3: 70 71
 
 70:
-	sudo pacman -S i3-wm hsetroot i3lock xautolock numlockx otf-font-awesome dmenu
+	sudo pacman $(optnoconfirm) -S i3-wm hsetroot i3lock xautolock numlockx otf-font-awesome dmenu
 #     altab-git installation with yaourt produces an error. The commit is:
 #         45816dc7777b63284bd82c49683e7dd6d9955571
 #         of 2020-04-21
 #     This comment was written 2020-07-11
 #     yaourt -a alttab-git
 	yaourt -a bumblebee-status
-	gpg --recv-key 9B8450B91D1362C1
+	gpg --keyserver hkp://keys.gnupg.net:80 --recv-key 9B8450B91D1362C1
 	yaourt -a j4-dmenu-desktop
 	touch "$@"
 
@@ -163,14 +172,17 @@ i3-conf: 71
 pkg-gui: 80
 
 80:
-	sudo pacman -S alacritty
-	sudo pacman -S gvim
-	sudo pacman -S veracrypt
-	sudo pacman -S vlc mplayer
-	sudo pacman -S thunderbird thunderbird-i18n-fr
-	sudo pacman -S firefox firefox-i18n-fr
-	sudo pacman -S gwenview
-	balooctl stop
+	sudo pacman $(optnoconfirm) -S alacritty
+	@if [ "$(noconfirm)" == "1" ]; then \
+		sudo pacman $(optnoconfirm) -R vim; \
+	fi
+	sudo pacman $(optnoconfirm) -S gvim
+	sudo pacman $(optnoconfirm) -S veracrypt
+	sudo pacman $(optnoconfirm) -S vlc mplayer
+	sudo pacman $(optnoconfirm) -S thunderbird thunderbird-i18n-fr
+	sudo pacman $(optnoconfirm) -S firefox firefox-i18n-fr
+	sudo pacman $(optnoconfirm) -S gwenview
+	sudo pacman $(optnoconfirm) -S qbittorrent
 	balooctl disable
 	touch "$@"
 

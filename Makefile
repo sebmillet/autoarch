@@ -59,7 +59,7 @@ install: uefikeys/Makefile csdcard/Makefile
 	cd src && tar -h -zcvf kernsign.tar.gz kernsign
 	mv src/kernsign.tar.gz install/cfg-41-kernsign.tar.gz
 	cp src/freezpkg.sh install/cfg-50-freezpkg.sh
-	cp src/zfs.txt install/cfg-52-zfs.txt
+	cp src/zfs.txt install/cfg-52-zfs-NOT-PART-OF-DEFAULT-INSTALL.txt
 	cp src/postfix-inst.txt install/cfg-55-postfix-inst.txt
 	cd src && tar -h -zcvf postfix-PRIVATE.tar.gz --exclude=passwd-fake postfix
 	mv src/postfix-PRIVATE.tar.gz install/cfg-56-postfix-PRIVATE.tar.gz
