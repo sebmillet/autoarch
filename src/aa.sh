@@ -59,6 +59,8 @@
 
 set -euo pipefail
 
+VERSION=v0.7
+
 # CONFIG {{{
 
 do_loadkeys=y
@@ -179,7 +181,12 @@ if [ "${interactive}" == "n" ] && [ -z "${cu_password}" ]; then
 fi
 
 # CONFIG }}}
+# DISPLAY VERSION {{{
 
+if [ "${1:-}" == "--version" ] || [ "${1:-}" == "-v" ]; then
+    echo "aa.sh version ${VERSION}"
+    exit 0
+fi # }}}
 # REVERT DISK OPERATIONS {{{
 if [ "${1:-}" == "stop" ]; then
 

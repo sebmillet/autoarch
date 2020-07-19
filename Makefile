@@ -108,10 +108,12 @@ INSTPUB.tgz: install/.autoarch-install-directory
 
 checkversion:
 	@verfile=$(shell cat .version); \
+		veraa=$(shell grep "^VERSION=" src/aa.sh | sed 's/.*=//'); \
 		vergit=$(shell git tag | tail -1); \
 		echo "Current version according to file .version = $$verfile"; \
+		echo "Current version according to src/aa.sh     = $$veraa"; \
 		echo "Current version according to git tags      = $$vergit"; \
-		if [ "$$verfile" == "$$vergit" ]; then \
+		if [ "$$verfile" == "$$veraa" ] && [ "$$verfile" == "$$vergit" ]; then \
 			echo "OK"; \
 		else \
 			echo "** ERROR **"; \
