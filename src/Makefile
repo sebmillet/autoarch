@@ -12,7 +12,7 @@ cli=10 15 20 30
 ifeq ($(has_private_content), yes)
 	cli+=40 41 45
 endif
-cli+=50 55 56 58
+cli+=50 52 55 56 58
 
 all: cli gui
 
@@ -71,6 +71,10 @@ kernconf: 40 41 50
 50:
 	sudo ./cfg-50-freezpkg.sh
 	touch "$@"
+
+52:
+	yaourt -a zfs-utils
+	yaourt -a zfs-linux-lts
 
 csdcard: 45
 
