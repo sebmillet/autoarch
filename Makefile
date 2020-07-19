@@ -85,6 +85,8 @@ install: uefikeys/Makefile csdcard/Makefile
 		rmdir i3-conf
 	cp src/pkg-gui.txt install/cfg-80-pkg-gui.txt
 	echo $(shell date --iso-8601=seconds) > install/_timestamp
+	cp README.md install/
+	cp .version install/
 	touch install/.autoarch-install-directory
 
 dist: INSTPUB.tgz INSTPRIV.tgz
@@ -99,6 +101,18 @@ INSTPUB.tgz: install/.autoarch-install-directory
 	echo "not part of public archive" > install/cfg-45-csdcard.txt
 	tar -zcvf INSTPUB.tgz --exclude="*-PRIVATE*" install
 	rm install/cfg-40-uefikeys.txt install/cfg-45-csdcard.txt
+
+checkversion:
+	@verfile=$(shell cat .version); \
+		vergit=$(shell git tag | tail -1); \
+		echo "Current version according to file .version = $$verfile"; \
+		echo "Current version according to git tags      = $$vergit"; \
+		if [ "$$verfile" == "$$vergit" ]; then \
+			echo "OK"; \
+		else \
+			echo "** ERROR **"; \
+			exit 1; \
+		fi
 
 clean:
 	if [ -e install/Makefile ]; then \
