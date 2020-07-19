@@ -33,7 +33,10 @@ There are two stages:
    files, 20 to install some extra packages, etc.).
 
    Higher-level targets (targets triggering other targets) are:
-     cli: installs and configures everything non-gui.
-     gui: installs and configures everything gui.
-     all: triggers both cli and gui
+
+   * cli: installs and configures everything non-gui.
+
+   * gui: installs and configures everything gui.
+
+   * all: triggers both cli and gui
 
