@@ -11,7 +11,9 @@ There are two stages:
    it.
    To download aa.sh from a (network-enabled) archiso, execute:
 
+   ```shell
    curl -O https://raw.githubusercontent.com/sebmillet/autoarch/master/src/aa.sh
+   ```
 
    If aa.sh finds itself part of an extracted archive (INSTPUB.tgz or
    INSTPRIV.tgz, see below), then it won't download it.
