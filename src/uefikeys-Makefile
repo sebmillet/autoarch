@@ -6,11 +6,11 @@ default:
 
 install:
 	mkdir -p "${copytarget}"
-	cp -i *.crt "${copytarget}"
-	cp -i *.esl "${copytarget}"
-	cp -i *.key "${copytarget}"
-	cp -i GUID.txt "${copytarget}"
-	cp -i *.auth "${copytarget}"
+	cp $(cpopt) *.crt "${copytarget}"
+	cp $(cpopt) *.esl "${copytarget}"
+	cp $(cpopt) *.key "${copytarget}"
+	cp $(cpopt) GUID.txt "${copytarget}"
+	cp $(cpopt) *.auth "${copytarget}"
 	chmod -R 400 "${copytarget}"
 	chmod 500 "${copytarget}"
 

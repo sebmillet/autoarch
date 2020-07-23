@@ -2,14 +2,14 @@ default:
 	@echo "Run 'sudo make configure' to configure autosvg"
 
 configure:
-	pacman -S cronie rsnapshot
+	pacman $(pacmanopt) -S cronie rsnapshot
 	mkdir -p /test-rsnapshot-backup
-	cp -i rsync.exclude /etc/
+	cp $(cpopt) rsync.exclude /etc/
 	if [ -e /etc/rsnapshot.conf ]; then \
 		mv /etc/rsnapshot.conf /etc/rsnapshot.conf.prev; \
 	fi
-	cp -i rsnapshot.conf /etc/
-	cp -i recfilestats /etc/cron.weekly/
+	cp $(cpopt) rsnapshot.conf /etc/
+	cp $(cpopt) recfilestats /etc/cron.weekly/
 	if grep -c "TAGSEBMILLETANACRONTAB" /etc/anacrontab; then \
 		echo "/etc/anacrontab already updated, skipping this step."; \
 	else \
@@ -28,10 +28,7 @@ configure:
 		echo '@weekly	20	rsnapshot-weekly	rsnapshot weekly' >> /etc/anacrontab; \
 		echo '@monthly	45	rsnapshot-monthly	rsnapshot monthly' >> /etc/anacrontab; \
 	fi
-	read -r -p "Activate cronie at startup? (y/N)" resp; \
-	if [ "$${resp}" == "y" ]; then \
-		systemctl enable cronie.service; \
-	fi
+	systemctl enable cronie.service;
 	@echo
 	@echo "* ************************************ *"
 	@echo "* /etc/rsnapshot.conf is in test mode  *"

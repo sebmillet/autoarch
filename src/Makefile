@@ -1,6 +1,23 @@
 # Makefile
 # Copyright 2020 Sébastien Millet, milletseb@laposte.net
 
+# About using this Makefile with option noconfirm=1
+#
+#   THIS OPTION IS EXTREMLY UNSAFE AND COULD PRODUCE UNPREDICTABLE BEHAVIOR
+#
+#   1. pacman is called with --noconfirm, that implies choice selections get
+#      default response, that is often not what you want.
+#
+#   2. sudo is configured so that a password is not asked FOR ANY COMMAND called
+#      with sudo. Yes, this means the user is (privilege-wise) like root.
+#
+#   3. yaourt is called with --noconfirm option + first package is installed,
+#      that could potentially lead to installing wrong package!
+#
+#   noconfirm=1 is a hack provided for test purposes, to perform a complete
+#   install and configuration without interaction.
+#
+
 has_private_content=yes
 qualifier=PRIVATE
 ifeq ($(wildcard .private),)
@@ -8,11 +25,18 @@ ifeq ($(wildcard .private),)
 	qualifier=PUBLIC
 endif
 
+cli=
+
+optmake=cpopt=-i
 ifeq ($(noconfirm), 1)
 	optnoconfirm=--noconfirm
+	optmake=pacmanopt=--noconfirm yaourtopt=--noconfirm
+	yaourtopt=--noconfirm
+	patchopt=-f
+	cli+=05
 endif
 
-cli=10 15 20 30
+cli+=10 15 20 30
 ifeq ($(has_private_content), yes)
 	cli+=40 41 45
 endif
@@ -31,10 +55,17 @@ gui: $(gui)
 
 cfg-seb: 10
 
+05:
+	# Credits:
+	#   https://stackoverflow.com/questions/323957/how-do-i-edit-etc-sudoers-from-a-script
+	echo '%wheel ALL=(ALL) NOPASSWD: ALL' \
+		| (sudo su -c 'EDITOR="tee" visudo -f /etc/sudoers.d/wheel-nopwd')
+	touch "$@"
+
 10:
 	tar -zxvf cfg-10-seb-$(qualifier).tar.gz && \
 		cd cfg-seb-$(qualifier) && \
-		$(MAKE) install
+		$(MAKE) $(optmake) install
 	touch "$@"
 
 15:
@@ -58,36 +89,44 @@ pkg-extra: 20
 yaourt: 30
 
 30:
-	./cfg-30-yaourt.sh
+	./cfg-30-yaourt.sh $(optnoconfirm)
 	touch "$@"
 
 kernconf: 40 41 50
 
 40:
+	if [ -d "uefikeys" ]; then \
+		chmod u+w uefikeys; \
+	fi
 	tar -zxvf cfg-40-uefikeys-PRIVATE.tar.gz
-	cd uefikeys && sudo $(MAKE) install
+	cd uefikeys && sudo $(MAKE) $(optmake) install
 	touch "$@"
 
 41:
 	tar -zxvf cfg-41-kernsign.tar.gz
-	cd kernsign && sudo $(MAKE) install
+	cd kernsign && sudo $(MAKE) $(optmake) install
 	touch "$@"
 
 50:
-	sudo ./cfg-50-freezpkg.sh
+	sudo ./cfg-50-freezpkg.sh $(patchopt)
 	touch "$@"
 
 52:
 	gpg --keyserver hkp://keys.gnupg.net:80 --recv-key 6AD860EED4598027
-	yaourt -a zfs-utils
-	yaourt -a zfs-linux-lts
+	@if [ "$(noconfirm)" == "1" ]; then \
+		echo "1" | yaourt $(yaourtopt) -a zfs-utils; \
+		echo "1" | yaourt $(yaourtopt) -a zfs-linux-lts; \
+	else \
+		yaourt $(yaourtopt) -a zfs-utils; \
+		yaourt $(yaourtopt) -a zfs-linux-lts; \
+	fi
 	touch "$@"
 
 csdcard: 45
 
 45:
 	tar -zxvf cfg-45-csdcard-PRIVATE.tar.gz
-	cd csdcard && sudo $(MAKE) install
+	cd csdcard && sudo $(MAKE) $(optmake) install
 	touch "$@"
 
 postfix: 55 56
@@ -102,7 +141,7 @@ postfix: 55 56
 	else \
 		sudo tar -zxvf cfg-56-postfix-PUBLIC.tar.gz; \
 	fi
-	cd postfix && sudo $(MAKE) configure
+	cd postfix && sudo $(MAKE) $(optmake) configure
 	touch "$@"
 
 cpanm: 57
@@ -126,7 +165,7 @@ cpanm: 57
 
 58:
 	tar -zxvf cfg-58-autosvg.tar.gz
-	cd autosvg && sudo $(MAKE) configure
+	cd autosvg && sudo $(MAKE) $(optmake) configure
 	touch "$@"
 
 gnome: 60 61
@@ -157,23 +196,31 @@ i3: 70 71
 #         of 2020-04-21
 #     This comment was written 2020-07-11
 #     yaourt -a alttab-git
-	yaourt -a bumblebee-status
+	@if [ "$(noconfirm)" == "1" ]; then \
+		echo "1" | yaourt $(yaourtopt) -a bumblebee-status; \
+	else \
+		yaourt $(yaourtopt) -a bumblebee-status; \
+	fi
 	gpg --keyserver hkp://keys.gnupg.net:80 --recv-key 9B8450B91D1362C1
-	yaourt -a j4-dmenu-desktop
+	@if [ "$(noconfirm)" == "1" ]; then \
+		echo "1" | yaourt $(yaourtopt) -a j4-dmenu-desktop; \
+	else \
+		yaourt $(yaourtopt) -a j4-dmenu-desktop; \
+	fi
 	touch "$@"
 
 i3-conf: 71
 
 71:
 	tar -zxvf cfg-71-i3-conf.tar.gz
-	cd i3-conf && $(MAKE) install
+	cd i3-conf && $(MAKE) $(optmake) install
 	touch "$@"
 
 pkg-gui: 80
 
 80:
 	sudo pacman $(optnoconfirm) -S alacritty
-	@if [ "$(noconfirm)" == "1" ]; then \
+	-@if [ "$(noconfirm)" == "1" ]; then \
 		sudo pacman $(optnoconfirm) -R vim; \
 	fi
 	sudo pacman $(optnoconfirm) -S gvim
@@ -181,8 +228,9 @@ pkg-gui: 80
 	sudo pacman $(optnoconfirm) -S vlc mplayer
 	sudo pacman $(optnoconfirm) -S thunderbird thunderbird-i18n-fr
 	sudo pacman $(optnoconfirm) -S firefox firefox-i18n-fr
-	sudo pacman $(optnoconfirm) -S gwenview
 	sudo pacman $(optnoconfirm) -S qbittorrent
+	sudo pacman $(optnoconfirm) -S conky
+	sudo pacman $(optnoconfirm) -S gwenview
 	balooctl disable
 	touch "$@"
 

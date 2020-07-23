@@ -15,13 +15,11 @@ function process_entry {
 
     cpopt=
     cppostpath=
-    cppostpath2=
     finalcpopt=
     if [ -d "${f}" ]; then
         cppostpath="/*"
-        cppostpath2=
         cpopt='-r'
-        finalcpopt='-r'
+        finalcpopt="${finalcpopt} -r"
     else
         cpopt='-L'
     fi
@@ -43,6 +41,7 @@ function process_entry {
         mkdir -p "${cfgtarget}"
     fi
     shopt -s dotglob
+        # shellcheck disable=SC2086
     ${sudoprefix} cp -v ${cpopt} "${f}"${cppostpath} "${cfgtarget}"
     shopt -u dotglob
 
@@ -70,7 +69,7 @@ function process_entry {
 #        echo "========== [${t_without_last_dir}] =========="
     fi
 
-    echo "${sudoprefix}cp --preserve=all -i ${finalcpopt} "'"'"${f}"'"'" ${target}" \
+    echo "${sudoprefix}cp --preserve=all \${delayed_cpopt} ${finalcpopt} "'"'"${f}"'"'" ${target}" \
         >> "${cfg}/install.sh"
 }
 
@@ -106,6 +105,8 @@ for II in 1 2; do
         echo ""; \
         echo "set -euo pipefail"; \
         echo ""; \
+        echo 'delayed_cpopt="${1:-}"'; \
+        echo ""; \
     } > "${usercfg}/install.sh"
     chmod +x "${usercfg}/install.sh"
 
@@ -118,23 +119,23 @@ for II in 1 2; do
         echo "	exit 1"; \
         echo ""; \
         echo "install:"; \
-        echo "	./install.sh"; \
+        echo '	./install.sh $(cpopt)'; \
     } > "${usercfg}/Makefile"
 
     if [ "${II}" == "1" ]; then
         find . -type l | while read -r f; do
-            process_entry ${f} ${usercfg} ${userhome}
+            process_entry "${f}" ${usercfg} ${userhome}
         done
     else
         for f in ./.abcde.conf ./.alacritty.yml.gnome ./.alacritty.yml.i3 \
-          ./.aliases \ ./.conkyrc ./.conkyrc-i3 ./.gitconfig ./.gitignore \
+          ./.aliases ./.conkyrc ./.conkyrc-i3 ./.gitconfig ./.gitignore \
           ./.perlcriticrc ./.perltidyrc ./.profile ./.prpn ./.tmux.conf ./.vim \
           ./.vimrc ./.zsh-extra ./.zshrc ./alacritty-config.desktop ./bin \
           ./calibre ./config ./conky.desktop ./dconf \
           ./ignore-lid-switch-tweak.desktop ./keepassxc ./system.cfg \
           ./user.cfg ./.gnuradio;
           do
-            process_entry ${f} ${usercfg} ${userhome}
+            process_entry "${f}" ${usercfg} ${userhome}
         done
     fi
 

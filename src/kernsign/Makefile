@@ -3,12 +3,12 @@ default:
 
 install:
 	mkdir -p /etc/pacman.d/hooks
-	cp -i /usr/share/libalpm/hooks/90-mkinitcpio-install.hook \
+	cp $(cpopt) /usr/share/libalpm/hooks/90-mkinitcpio-install.hook \
 		/etc/pacman.d/hooks/90-mkinitcpio-install.hook
 	patch /etc/pacman.d/hooks/90-mkinitcpio-install.hook \
 		< 90-mkinitcpio-install.hook.patch
 	mkdir -p /usr/local/share/libalpm/scripts
-	cp -i /usr/share/libalpm/scripts/mkinitcpio-install \
+	cp $(cpopt) /usr/share/libalpm/scripts/mkinitcpio-install \
 		/usr/local/share/libalpm/scripts/mkinitcpio-install
 	patch /usr/local/share/libalpm/scripts/mkinitcpio-install \
 		< mkinitcpio-install.patch
