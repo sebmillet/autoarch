@@ -46,9 +46,12 @@ install: uefikeys/Makefile csdcard/Makefile
 	mkdir -p install
 	cp src/Makefile install/
 	cp src/aa.sh install/
+	cp src/nopwdsudo.txt install/cfg-05-nopwdsudo.txt
 	cp src/network.txt install/cfg-15-network.txt
 	cp src/pkg-extra.txt install/cfg-20-pkg-extra.txt
 	cp src/yaourt.sh install/cfg-30-yaourt.sh
+	cd src && tar -h -zcvf systemd.tar.gz systemd
+	mv src/systemd.tar.gz install/cfg-35-systemd.tar.gz
 	tar -zcvf uefikeys.tar.gz uefikeys
 	mv uefikeys.tar.gz install/cfg-40-uefikeys-PRIVATE.tar.gz
 	tar -zcvf csdcard.tar.gz csdcard

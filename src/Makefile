@@ -36,7 +36,7 @@ ifeq ($(noconfirm), 1)
 	cli+=05
 endif
 
-cli+=10 15 20 30
+cli+=10 15 20 30 35
 ifeq ($(has_private_content), yes)
 	cli+=40 41 45
 endif
@@ -77,8 +77,9 @@ cfg-seb: 10
 pkg-extra: 20
 
 20:
+	sudo pacman $(optnoconfirm) -Sy
 	sudo pacman $(optnoconfirm) -S openssh inetutils git sbsigntools base-devel pacman-contrib unzip
-	sudo pacman $(optnoconfirm) -S fzf tree pydf htop nethogs lsd
+	sudo pacman $(optnoconfirm) -S fzf bat tree pydf htop nethogs lsd
 	sudo pacman $(optnoconfirm) -S mlocate
 	sudo pacman $(optnoconfirm) -S shellcheck efitools the_silver_searcher gnu-efi \
 		cpanminus pandoc tldr
@@ -90,6 +91,11 @@ yaourt: 30
 
 30:
 	./cfg-30-yaourt.sh $(optnoconfirm)
+	touch "$@"
+
+35:
+	tar -zxvf cfg-35-systemd.tar.gz
+	cd systemd && sudo $(MAKE) $(optmake) configure
 	touch "$@"
 
 kernconf: 40 41 50

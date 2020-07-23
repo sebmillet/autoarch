@@ -1,0 +1,2 @@
+Update done to prevent sudo from asking password.
+Used to implement noconfirm=1 Makefile option.
