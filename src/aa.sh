@@ -59,7 +59,7 @@
 
 set -euo pipefail
 
-VERSION=v0.7
+VERSION=v0.8
 
 # CONFIG {{{
 
