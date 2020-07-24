@@ -167,8 +167,14 @@ kernel_opts='pci=noaer'
 cu_login=sebastien
 cu_comment="Sébastien Millet"
     # IMPORTANT
-    #   The 'wheel' membership is assumed when updating /etc/sudoers
-cu_groups="wheel,audio,kvm,users,systemd-journal"
+    #   - The 'wheel' membership is assumed when updating /etc/sudoers.
+    #   - audio: not sure of what it means.
+    #   - kvm: why not.
+    #   - systemd-journal: allows to run journalctl without sudo.
+    #   - uucp: /dev/ttyUSB0 belongs to group uucp with 660 access, therefore
+    #     belonging to this group allows to work with Arduino (upload program,
+    #     read output of Arduino on usb), without sudo.
+cu_groups="wheel,audio,kvm,users,systemd-journal,uucp"
 cu_password=1
 
 github_latest_release_url="https://api.github.com/repos/sebmillet/autoarch/releases/latest"
