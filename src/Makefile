@@ -153,7 +153,7 @@ postfix: 55 56
 cpanm: 57
 
 57:
-	sudo pacman $(optnoconfirm) -S unzip graphviz
+	sudo pacman $(optnoconfirm) -S graphviz
 	cpanm List::MoreUtils
 	cpanm Imager
 	cpanm --force Imager::Screenshot
