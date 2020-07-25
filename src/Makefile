@@ -234,7 +234,7 @@ pkg-gui: 80
 	sudo pacman $(optnoconfirm) -S vlc mplayer
 	sudo pacman $(optnoconfirm) -S thunderbird thunderbird-i18n-fr
 	sudo pacman $(optnoconfirm) -S firefox firefox-i18n-fr
-	sudo pacman $(optnoconfirm) -S qbittorrent
+	sudo pacman $(optnoconfirm) -S qbittorrent gimp keepassxc
 	sudo pacman $(optnoconfirm) -S conky
 	sudo pacman $(optnoconfirm) -S gwenview
 	balooctl disable
