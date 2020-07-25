@@ -39,10 +39,11 @@ function process_entry {
         tmp=${f#./}
         cfgtarget="${cfg}/${tmp}/"
         mkdir -p "${cfgtarget}"
+        chmod --reference=$(readlink "${f}") "${cfgtarget}"
     fi
     shopt -s dotglob
         # shellcheck disable=SC2086
-    ${sudoprefix} cp -v ${cpopt} "${f}"${cppostpath} "${cfgtarget}"
+    ${sudoprefix} cp --preserve=all -v ${cpopt} "${f}"${cppostpath} "${cfgtarget}"
     shopt -u dotglob
 
     if [ "$(echo "${tl}" | grep -c "/")" -ne 0 ] && [ -z "${sudoprefix}" ]; then

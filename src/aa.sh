@@ -132,7 +132,7 @@ rootname=rootfs
     #   n: use devdata in plain
 docrypt=y
     # VERY BAD PRACTICE TO WRITE A PASSWORD HERE! YOU'VE BEEN WARNED
-cryptpwd=1234
+cryptpwd=
 cryptmappername=clvm
     # LVM
 vgname=vol
@@ -175,7 +175,7 @@ cu_comment="Sébastien Millet"
     #     belonging to this group allows to work with Arduino (upload program,
     #     read output of Arduino on usb), without sudo.
 cu_groups="wheel,audio,kvm,users,systemd-journal,uucp"
-cu_password=1
+cu_password=
 
 github_latest_release_url="https://api.github.com/repos/sebmillet/autoarch/releases/latest"
 github_latest_release_filename=INSTPUB.tgz

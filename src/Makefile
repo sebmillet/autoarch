@@ -80,7 +80,7 @@ pkg-extra: 20
 	sudo pacman $(optnoconfirm) -Sy
 	sudo pacman $(optnoconfirm) -S openssh inetutils git sbsigntools base-devel pacman-contrib unzip
 	sudo pacman $(optnoconfirm) -S fzf bat tree pydf htop nethogs lsd
-	sudo pacman $(optnoconfirm) -S mlocate
+	sudo pacman $(optnoconfirm) -S mlocate bind-tools
 	sudo pacman $(optnoconfirm) -S shellcheck efitools the_silver_searcher gnu-efi \
 		cpanminus pandoc tldr
 	tldr -u
@@ -118,7 +118,7 @@ kernconf: 40 41 50
 	touch "$@"
 
 52:
-	gpg --keyserver hkp://keys.gnupg.net:80 --recv-key 6AD860EED4598027
+	-gpg --keyserver hkp://keys.openpgp.org:80 --recv-key 6AD860EED4598027
 	@if [ "$(noconfirm)" == "1" ]; then \
 		echo "1" | yaourt $(yaourtopt) -a zfs-utils; \
 		echo "1" | yaourt $(yaourtopt) -a zfs-linux-lts; \
@@ -207,7 +207,7 @@ i3: 70 71
 	else \
 		yaourt $(yaourtopt) -a bumblebee-status; \
 	fi
-	gpg --keyserver hkp://keys.gnupg.net:80 --recv-key 9B8450B91D1362C1
+	-gpg --keyserver hkp://keys.openpgp.org:80 --recv-key 9B8450B91D1362C1
 	@if [ "$(noconfirm)" == "1" ]; then \
 		echo "1" | yaourt $(yaourtopt) -a j4-dmenu-desktop; \
 	else \
@@ -236,6 +236,12 @@ pkg-gui: 80
 	sudo pacman $(optnoconfirm) -S firefox firefox-i18n-fr
 	sudo pacman $(optnoconfirm) -S qbittorrent gimp keepassxc
 	sudo pacman $(optnoconfirm) -S conky
+	@echo "Selection recommendations:"
+	@echo "  phonon-qt5-backend provider, select 2 (phonon-qt5-vlc)"
+	@echo "Press [Enter] key to continue"
+	@if [ "$(noconfirm)" != "1" ]; then \
+		read -r resp; \
+	fi
 	sudo pacman $(optnoconfirm) -S gwenview
 	balooctl disable
 	touch "$@"
