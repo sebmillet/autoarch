@@ -133,7 +133,9 @@ clean:
 
 distclean: clean
 	rm -f INSTPRIV.tgz
+	rm -f INSTPRIV-????-??-??.tgz
 	rm -f INSTPUB.tgz
+	rm -f INSTPUB-????-??-??.tgz
 
 mrproper: clean distclean
 	if [ -d uefikeys ]; then chmod u+w uefikeys; fi
