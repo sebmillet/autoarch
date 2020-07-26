@@ -118,7 +118,7 @@ kernconf: 40 41 50
 	touch "$@"
 
 52:
-	-gpg --keyserver hkp://keys.openpgp.org:80 --recv-key 6AD860EED4598027
+	gpg --import 6AD860EED4598027.gpg
 	@if [ "$(noconfirm)" == "1" ]; then \
 		echo "1" | yaourt $(yaourtopt) -a zfs-utils; \
 		echo "1" | yaourt $(yaourtopt) -a zfs-linux-lts; \
@@ -207,7 +207,7 @@ i3: 70 71
 	else \
 		yaourt $(yaourtopt) -a bumblebee-status; \
 	fi
-	-gpg --keyserver hkp://keys.openpgp.org:80 --recv-key 9B8450B91D1362C1
+	gpg --import 9B8450B91D1362C1.gpg
 	@if [ "$(noconfirm)" == "1" ]; then \
 		echo "1" | yaourt $(yaourtopt) -a j4-dmenu-desktop; \
 	else \
@@ -246,8 +246,11 @@ pkg-gui: 80
 	balooctl disable
 	touch "$@"
 
+.PHONY: clean mrproper
+
 clean:
-	rm -rf cfg-seb
+	rm -rf cfg-seb-PRIVATE
+	rm -rf cfg-seb-PUBLIC
 	if [ -d uefikeys ]; then \
 		chmod +w uefikeys; \
 		chmod +w uefikeys/*; \
@@ -256,6 +259,11 @@ clean:
 	rm -rf csdcard
 	rm -rf kernsign
 	rm -rf i3-conf
+	rm -rf autosvg
+	rm -rf postfix
+	rm -rf systemd
+
+mrproper: clean
 	rm -f [0-9][0-9]
 
 # vim: ts=4:sw=4:tw=80:

@@ -46,6 +46,7 @@ install: uefikeys/Makefile csdcard/Makefile
 	mkdir -p install
 	cp src/Makefile install/
 	cp src/aa.sh install/
+	cp src/6AD860EED4598027.gpg src/9B8450B91D1362C1.gpg install/
 	cp src/nopwdsudo.txt install/cfg-05-nopwdsudo.txt
 	cp src/network.txt install/cfg-15-network.txt
 	cp src/pkg-extra.txt install/cfg-20-pkg-extra.txt
