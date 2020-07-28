@@ -40,7 +40,12 @@ cli+=10 15 20 30 35
 ifeq ($(has_private_content), yes)
 	cli+=40 41 45
 endif
-cli+=50 55 56 57 58
+cli+=50
+ifeq ($(noconfirm), 1)
+else
+	cli+=54
+endif
+cli+=55 56 57 58
 
 all: cli gui
 
@@ -134,6 +139,19 @@ csdcard: 45
 45:
 	tar -zxvf cfg-45-csdcard-PRIVATE.tar.gz
 	cd csdcard && sudo $(MAKE) $(optmake) install
+	touch "$@"
+
+54:
+	sudo chown root $$(tty)
+	sudo gpg --full-gen-key
+	sudo gpg --import milletseb.publickey
+	@echo 'You should later sign the key as follows:'
+	@echo '  $$ sudo su -'
+	@echo '  # gpg --edit-key milletseb@laposte.net'
+	@echo '  # (gpg) lsign'
+	@echo '  # (gpg) save'
+	@echo "Press [Enter] key to continue"
+	@read -r resp
 	touch "$@"
 
 postfix: 55 56
