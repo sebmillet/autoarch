@@ -79,8 +79,9 @@ pkg-extra: 20
 20:
 	sudo pacman $(optnoconfirm) -Sy
 	sudo pacman $(optnoconfirm) -S openssh inetutils git sbsigntools base-devel pacman-contrib unzip
-	sudo pacman $(optnoconfirm) -S fzf bat tree pydf htop nethogs lsd
-	sudo pacman $(optnoconfirm) -S mlocate bind-tools
+	sudo pacman $(optnoconfirm) -S fzf bat tree pydf htop nethogs lsd mlocate bind-tools net-tools
+	sudo pacman $(optnoconfirm) -S edk2-ovmf
+	sudo pacman $(optnoconfirm) -S ntfs-3g
 	sudo pacman $(optnoconfirm) -S shellcheck efitools the_silver_searcher gnu-efi \
 		cpanminus pandoc tldr
 	tldr -u
@@ -262,6 +263,7 @@ clean:
 	rm -rf autosvg
 	rm -rf postfix
 	rm -rf systemd
+	rm -f wpa_supplicant.conf
 
 mrproper: clean
 	rm -f [0-9][0-9]

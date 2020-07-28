@@ -28,7 +28,7 @@
 #
 #   If using a Wifi network, then you have to:
 #
-#   1- Set $do_network to y
+#   1- Set $do_wifi to y
 #
 #   2- Update $netctl_cfg with your Wifi data. Consider updating the variables:
 #
@@ -64,7 +64,7 @@ VERSION=v0.9.1
 # CONFIG {{{
 
 do_loadkeys=y
-do_network=n
+do_wifi=y
 do_timedatectl=y
 do_disk=y
 do_mirrorlist=y
@@ -80,31 +80,28 @@ keymap=fr-latin1
 localhost='maison-arch'
 localdomain='localdomain'
 
-netctl_profile=main
-    # NETCTL FILE USED *DURING* INSTALL
-netctl_cfg=$(cat << end-of-file
-Description='Main Connection For Install'
-Interface=wlan0
-Connection=wireless
-Security=wpa
-IP=dhcp
-ESSID='THE ESSID OF MY WIFI NETWORK'
-Key='THE PASSPHRASE FOR MY WIFI NETWORK'
-end-of-file
-)
-    # Wait time between "netctl start" and "ping" test, in seconds
-netctl_wait=15
+wifi_dev=wlan0
+wifi_ESSID='*****'
+wifi_Key='*****'
+
+    # Wait time after wpa_supplicant call
+netctl_wait1=6
+netctl_wait2=6
 server_to_ping='archlinux.org'
 pacstrap_net_extra='netctl wpa_supplicant dhcpcd'
 
     # NETCTL FILE USED *AFTER* INSTALL
     # Beware of 'Predictable Network Interface Names'! (eth0 needs be renamed)
     # For ex. if in a qemu VM with default settings, it'll be ens3
+netctl_profile=main
 netctl_cfg_postinst=$(cat << end-of-file
-Description='Main Connection'
-Interface=ens3
-Connection=ethernet
+Description='connexion principale'
+Interface=wlp2s0
+Connection=wireless
+Security=wpa
 IP=dhcp
+ESSID='*****'
+Key='*****'
 end-of-file
 )
 
@@ -112,19 +109,19 @@ end-of-file
     #   n: wipe only devdata (leave top level partitionning untouched)
     #      Actually the LVM inside devdata (if using LVM...) will be
     #      partitionned, still.
-dopart=y
+dopart=n
     # Disk to partition, example: /dev/sda
-devdisk=/dev/sda
+devdisk=
 efipartname="EFI System Partition"
 lvmpartname="main"
     # EFI partition, example: /dev/sda1
-devefi=
+devefi=/dev/nvme0n1p1
 efisizemb=500
     # Main volumes
 devswap=
     # If left empty, is set to half of physical memory
 swapsizemb=
-devdata=
+devdata=/dev/nvme0n1p2
 swapname=swap
 rootname=rootfs
     # Encrypt devdata?
@@ -214,7 +211,7 @@ fi
 # REVERT DISK OPERATIONS }}}
 # LOADKEYS {{{
 
-if [ "${do_loadkeys}" == "y" ] && [ -e .do_loadkeys_done ]; then
+if [ "${do_loadkeys}" == "y" ] && [ -e .do_01_loadkeys_done ]; then
     echo ".. LOADKEYS: already done, skipped"
     do_loadkeys=n
 fi
@@ -223,7 +220,7 @@ if [ "${do_loadkeys}" == "y" ]; then
 loadkeys "${keymap}"
 
 echo "== LOADKEYS: OK"
-touch .do_loadkeys_done
+touch .do_01_loadkeys_done
 fi # do_loadkeys }}}
 # VERIFYBOOTMODE {{{
 
@@ -235,40 +232,36 @@ fi
 # VERIFYBOOTMODE }}}
 # NETWORK {{{
 
-if [ "${do_network}" == "y" ] && [ -e .do_network_done ]; then
-    echo ".. NETWORK: already done, skipped"
-    do_network=n
+if [ "${do_wifi}" == "y" ] && [ -e .do_02_wifi_done ]; then
+    echo ".. WIFI: already done, skipped"
+    do_wifi=n
 fi
-if [ "${do_network}" == "y" ]; then
+if [ "${do_wifi}" == "y" ]; then
 
-echo "${netctl_cfg}" > "/etc/netctl/${netctl_profile}"
-iface=$(echo "${netctl_cfg}" | grep -i "^interface\s*=" | sed 's/.*= *//')
-if [ -z "${iface}" ]; then
-    echo "Error: could not work out network interface from \$netctl_cfg."
-    exit 11
-fi
-
-echo "Will try to activate network"
+echo "Will try to activate WIFI"
 
 set +e
-netctl stop-all
-ip link set "${iface}" down
+ip link set "${wifi_dev}" down
 set -e
 sleep 1
 
-echo "Mounting network profile: ${netctl_profile}"
-netctl start "${netctl_profile}"
-sleep "${netctl_wait}"
+wpa_passphrase "$wifi_ESSID" "${wifi_Key}" > wpa_supplicant.conf
+wpa_supplicant -B -i "${wifi_dev}" -c wpa_supplicant.conf
+sleep "${netctl_wait1}"
+
+dhcpcd "${wifi_dev}"
+sleep "${netctl_wait2}"
+
     # No test, nothing: we just do a ping and if it fails, it'll produce a non
     # null return code that'll stop the script.
 ping -c1 "${server_to_ping}"
 
-echo "== NETWORK: OK"
-touch .do_network_done
-fi # do_network }}}
+echo "== WIFI: OK"
+touch .do_02_wifi_done
+fi # do_wifi }}}
 # TIMEDATECTL {{{
 
-if [ "${do_timedatectl}" == "y" ] && [ -e .do_timedatectl_done ]; then
+if [ "${do_timedatectl}" == "y" ] && [ -e .do_03_timedatectl_done ]; then
     echo ".. TIMEDATECTL: already done, skipped"
     do_timedatectl=n
 fi
@@ -277,11 +270,11 @@ if [ "${do_timedatectl}" == "y" ]; then
 timedatectl set-ntp true
 
 echo "== TIMEDATECTL: OK"
-touch .do_timedatectl_done
+touch .do_03_timedatectl_done
 fi # do_timedatectl }}}
 # DISK {{{
 
-if [ "${do_disk}" == "y" ] && [ -e .do_disk_done ]; then
+if [ "${do_disk}" == "y" ] && [ -e .do_04_disk_done ]; then
     echo ".. DISK: already done, skipped"
     do_disk=n
 fi
@@ -437,21 +430,26 @@ if [ -z "${devdisk}" ]; then
     # bash does not seem to implement '$' (end of string) in regex patterns
     # therefore it won't work with ${var/pat/rep} logic.
     # shellcheck disable=SC2001
-    vv=$(echo "${devdata}" | sed 's/[0-9]\+$//')
+    vv=$(echo "${devdata}" | sed 's/p\?[0-9]\+$//')
 else
     vv="${devdisk}"
 fi
 
 set +e
 efipartnum=$(parted -m -s "${vv}" -- unit gib p \
-    | grep ":[^:]*esp[^:]*$" \
+    | grep ":[^:]*esp" \
     | awk -F: '{ print $1; }')
 set -e
 if [ -z "${efipartnum}" ]; then
     echo "Error: unable to work out the EFI partition number."
     exit 2
 fi
-guesseddevefi="${vv}${efipartnum}"
+
+if echo "${vv}" | grep -c "[0-9]$"; then
+    guesseddevefi="${vv}p${efipartnum}"
+else
+    guesseddevefi="${vv}${efipartnum}"
+fi
 if [ -n "${devefi}" ]; then
     if [ "${devefi}" != "${guesseddevefi}" ]; then
         echo "Error: enforced \$devefi (${devefi}) seems not OK"
@@ -513,7 +511,12 @@ if [ "${docrypt}" != "y" ]; then
         echo "Error: unable to work out the swap partition number."
         exit 6
     fi
-    guesseddevswap="${vv}${swappartnum}"
+
+    if echo "${vv}" | grep -c "[0-9]$"; then
+        guesseddevswap="${vv}p${swappartnum}"
+    else
+        guesseddevswap="${vv}${swappartnum}"
+    fi
     if [ -n "${devswap}" ]; then
         if [ "${devswap}" != "${guesseddevswap}" ]; then
             echo "Error: enforced \$devswap (${devswap}) seems not OK"
@@ -576,20 +579,20 @@ mkdir /mnt/boot
 mount "${devefi}" /mnt/boot
 
 echo "== DISK: OK"
-touch .do_disk_done
+touch .do_04_disk_done
 fi # do_disk }}}
 # MIRRORLIST {{{
 
-if [ "${do_mirrorlist}" == "y" ] && [ -e .do_mirrorlist_done ]; then
+if [ "${do_mirrorlist}" == "y" ] && [ -e .do_05_mirrorlist_done ]; then
     echo ".. MIRRORLIST: already done, skipped"
     do_mirrorlist=n
 fi
 if [ "${do_mirrorlist}" == "y" ]; then
 
-if [ ! -f mirrorlist.orig ]; then
-    cp -ip /etc/pacman.d/mirrorlist mirrorlist.orig
+if [ ! -e /usr/bin/reflector ]; then
+    pacman -Sy
+    pacman --noconfirm -S reflector
 fi
-
     # shellcheck disable=SC2086
 reflector ${reflector_options} --save /etc/pacman.d/mirrorlist
 
@@ -602,11 +605,11 @@ if [ "${countmirrors}" -ne "${linerange_size}" ]; then
 fi
 
 echo "== MIRRORLIST: OK"
-touch .do_mirrorlist_done
+touch .do_05_mirrorlist_done
 fi # do_mirrorlist }}}
 # PACSTRAP {{{
 
-if [ "${do_pacstrap}" == "y" ] && [ -e .do_pacstrap_done ]; then
+if [ "${do_pacstrap}" == "y" ] && [ -e .do_06_pacstrap_done ]; then
     echo ".. PACSTRAP: already done, skipped"
     do_pacstrap=n
 fi
@@ -621,11 +624,11 @@ fi
 pacstrap /mnt ${pacstrap_install} ${pacstrap_extra} ${pacstrap_net_extra}
 
 echo "== PACSTRAP: OK"
-touch .do_pacstrap_done
+touch .do_06_pacstrap_done
 fi # do_pacstrap }}}
 # FSTAB {{{
 
-if [ "${do_fstab}" == "y" ] && [ -e .do_fstab_done ]; then
+if [ "${do_fstab}" == "y" ] && [ -e .do_07_fstab_done ]; then
     echo ".. FSTAB: already done, skipped"
     do_fstab=n
 fi
@@ -638,11 +641,11 @@ fi
 genfstab -U /mnt >> /mnt/etc/fstab
 
 echo "== FSTAB: OK"
-touch .do_fstab_done
+touch .do_07_fstab_done
 fi # do_fstab }}}
 # MISC(CHROOT) {{{
 
-if [ "${do_chroot}" == "y" ] && [ -e .do_chroot_done ]; then
+if [ "${do_chroot}" == "y" ] && [ -e .do_08_chroot_done ]; then
     echo ".. CHROOT: already done, skipped"
     do_chroot=n
 fi
@@ -662,16 +665,13 @@ fi
 cp -p hosts.orig /mnt/etc/hosts
 
 if [ "${docrypt}" == "y" ]; then
-    t=$(blkid | grep -c -i \
-                "type="'"'"crypto_LUKS"'"'".*partlabel="'"'"${lvmpartname}"'"')
+    t=$(blkid | grep -c -i "^${devdata}"':.*type="crypto_LUKS"')
     if [ "${t}" -ne "1" ]; then
         echo "Error: could not work out the main encrypted partition."
         exit 18
     fi
-    kerneluuid=$(blkid | grep -i \
-                "type="'"'"crypto_LUKS"'"'".*partlabel="'"'"${lvmpartname}"'"' \
+    kerneluuid=$(blkid | grep -i "^${devdata}"':.*type="crypto_LUKS"' \
                 | sed 's/^.* UUID="\([^"]\+\)".*$/\1/')
-
 else
     d=$(df /mnt | sed '1d;s/\s.*$//')
     kerneluuid=$(blkid "${d}" | sed 's/^.* UUID="\([^"]\+\)".*$/\1/')
@@ -694,6 +694,10 @@ else
         | xargs curl -L --output "/mnt/${github_latest_release_filename}"
 fi
 cp "${0:-}" /mnt/root/
+optpacman=
+if [ "${interactive}" == "n" ]; then
+    optpacman='--noconfirm'
+fi
 
 cat > /mnt/subscript.sh << end-of-file
 #!/usr/bin/bash
@@ -784,20 +788,8 @@ fi
 (echo "password"; echo "password") | passwd
 echo 'root password is: password'
 
-# NOTE
-#   Sending 'y' confirmation instead of executing pacman with --noconfirm is not
-#   a mistake.
-#   We want to just confirm installation.
-#   If we'd execute pacman with --noconfirm, then any selection choice would get
-#   default response and this is not what we want.
-#   To date (Jule 11th), as it turns out, the packages installed as per
-#   package_install variable do NOT trigger a choice selection, but evolution in
-#   Arch packages, and/or, in package_install content, could trigger a choice
-#   selection in the future.
-#   Should that be the case, we DON'T WANT default choice to be made.
 if [ -n "${pacman_install}" ]; then
-        # shellcheck disable=SC2086
-    echo "y" | pacman -S ${pacman_install}
+    pacman ${optpacman} -S ${pacman_install}
 fi
 
 useradd -d "/home/${cu_login}" -c "${cu_comment}" -m -U -G "${cu_groups}" \
@@ -849,11 +841,11 @@ if [ "${r}" != "0" ]; then
 fi
 
 echo "== CHROOT: OK"
-touch .do_chroot_done
+touch .do_08_chroot_done
 fi # do_chroot }}}
 # POSTINST {{{
 
-if [ "${do_postinst}" == "y" ] && [ -e .do_postinst_done ]; then
+if [ "${do_postinst}" == "y" ] && [ -e .do_09_postinst_done ]; then
     echo ".. POSTINST: already done, skipped"
     do_postinst=n
 fi
@@ -862,7 +854,7 @@ if [ "${do_postinst}" == "y" ]; then
 echo "${netctl_cfg_postinst}" > "/mnt/etc/netctl/${netctl_profile}"
 
 echo "== POSTINST: OK"
-touch .do_postinst_done
+touch .do_09_postinst_done
 fi # do_postinst }}}
 
 echo 'Installation complete'
