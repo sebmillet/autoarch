@@ -40,12 +40,12 @@ cli+=10 15 20 30 35
 ifeq ($(has_private_content), yes)
 	cli+=40 41 45
 endif
-cli+=50
+cli+=50 55 56 57
 ifeq ($(noconfirm), 1)
 else
-	cli+=54
+	cli+=58
 endif
-cli+=55 56 57 58
+cli+= 59
 
 all: cli gui
 
@@ -141,7 +141,7 @@ csdcard: 45
 	cd csdcard && sudo $(MAKE) $(optmake) install
 	touch "$@"
 
-54:
+58:
 	sudo chown root $$(tty)
 	sudo gpg --full-gen-key
 	sudo gpg --import milletseb.publickey
@@ -188,8 +188,8 @@ cpanm: 57
 	cpanm Regexp::Common
 	touch "$@"
 
-58:
-	tar -zxvf cfg-58-autosvg.tar.gz
+59:
+	tar -zxvf cfg-59-autosvg.tar.gz
 	cd autosvg && sudo $(MAKE) $(optmake) configure
 	touch "$@"
 

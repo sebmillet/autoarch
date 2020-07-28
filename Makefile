@@ -80,7 +80,8 @@ install: uefikeys/Makefile csdcard/Makefile
 	mv -i src/postfix-PRIVATE-Makefile src/postfix/Makefile
 	cp src/cpanm.txt install/cfg-57-cpanm.txt
 	cd src && tar -h -zcvf autosvg.tar.gz autosvg
-	mv src/autosvg.tar.gz install/cfg-58-autosvg.tar.gz
+	cp src/gpgkeys.txt install/cfg-58-gpgkeys.txt
+	mv src/autosvg.tar.gz install/cfg-59-autosvg.tar.gz
 	cp src/gnome-inst.txt install/cfg-60-gnome-inst.txt
 	cp src/gnome-conf.pseudo_sh install/cfg-61-gnome-conf.sh
 	./manage-includes.sh install/cfg-61-gnome-conf.sh

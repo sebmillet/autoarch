@@ -64,7 +64,7 @@ VERSION=v0.9.3
 # CONFIG {{{
 
 do_loadkeys=y
-do_wifi=y
+do_wifi=n
 do_timedatectl=y
 do_disk=y
 do_mirrorlist=y
@@ -109,19 +109,19 @@ end-of-file
     #   n: wipe only devdata (leave top level partitionning untouched)
     #      Actually the LVM inside devdata (if using LVM...) will be
     #      partitionned, still.
-dopart=n
+dopart=y
     # Disk to partition, example: /dev/sda
-devdisk=
+devdisk=/dev/sda
 efipartname="EFI System Partition"
 lvmpartname="main"
     # EFI partition, example: /dev/sda1
-devefi=/dev/nvme0n1p1
+devefi=
 efisizemb=500
     # Main volumes
 devswap=
     # If left empty, is set to half of physical memory
 swapsizemb=
-devdata=/dev/nvme0n1p2
+devdata=
 swapname=swap
 rootname=rootfs
     # Encrypt devdata?
@@ -129,7 +129,7 @@ rootname=rootfs
     #   n: use devdata in plain
 docrypt=y
     # VERY BAD PRACTICE TO WRITE A PASSWORD HERE! YOU'VE BEEN WARNED
-cryptpwd=
+cryptpwd=1234
 cryptmappername=clvm
     # LVM
 vgname=vol
@@ -172,7 +172,7 @@ cu_comment="Sébastien Millet"
     #     belonging to this group allows to work with Arduino (upload program,
     #     read output of Arduino on usb), without sudo.
 cu_groups="wheel,audio,kvm,users,systemd-journal,uucp"
-cu_password=
+cu_password=1
 
 github_latest_release_url="https://api.github.com/repos/sebmillet/autoarch/releases/latest"
 github_latest_release_filename=INSTPUB.tgz

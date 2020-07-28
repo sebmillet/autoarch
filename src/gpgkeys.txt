@@ -1,0 +1,4 @@
+autosvg scripts encrypt files with user' key, that need to be available in root's gnupg.
+This target will:
+1. Import user' public key
+2. Generate private key for root
