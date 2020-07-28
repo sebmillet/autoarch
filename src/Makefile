@@ -275,6 +275,10 @@ clean:
 		chmod +w uefikeys/*; \
 	fi
 	rm -rf uefikeys
+	if [ -d csdcard ]; then \
+		chmod +w csdcard; \
+		chmod +w csdcard/*; \
+	fi
 	rm -rf csdcard
 	rm -rf kernsign
 	rm -rf i3-conf
