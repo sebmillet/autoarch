@@ -11,6 +11,11 @@ function process_entry {
     local cfg=$2
     local myhome=$3
 
+    if [ ! -e "${f}" ]; then
+        echo "entry '${f}' does not exist"
+        exit 10
+    fi
+
     t=$(readlink "${f}")
 
     cpopt=
@@ -129,12 +134,14 @@ for II in 1 2; do
         done
     else
         for f in ./.abcde.conf ./.alacritty.yml.gnome ./.alacritty.yml.i3 \
-          ./.aliases ./.conkyrc ./.conkyrc-i3 ./.gitconfig ./.gitignore \
-          ./.perlcriticrc ./.perltidyrc ./.profile ./.prpn ./.tmux.conf ./.vim \
-          ./.vimrc ./.zsh-extra ./.zshrc ./alacritty-config.desktop ./bin \
-          ./calibre ./config ./conky.desktop ./dconf \
-          ./ignore-lid-switch-tweak.desktop ./keepassxc ./system.cfg \
-          ./user.cfg ./.gnuradio;
+            ./.termite-config.gnome ./.termite-config.i3 \
+            ./gnome-autostart.desktop ./.aliases ./.conkyrc-principal \
+            ./.conkyrc-meteo ./.conkyrc-i3 ./conky.desktop \
+            ./.startconky.sh ./.gitconfig ./.gitignore ./.perlcriticrc \
+            ./.perltidyrc ./.profile ./.prpn ./.tmux.conf ./.vim ./.vimrc \
+            ./.zsh-extra ./.zshrc ./bin ./calibre ./config ./dconf ./alacritty \
+            ./termite ./ignore-lid-switch-tweak.desktop ./keepassxc \
+            ./system.cfg ./user.cfg ./.gnuradio;
           do
             process_entry "${f}" ${usercfg} ${userhome}
         done

@@ -49,7 +49,7 @@ cli+= 59
 
 all: cli gui
 
-gui=60 61 70 71 80
+gui=70 71 75 76 80
 
 aa:
 	./aa.sh
@@ -193,9 +193,9 @@ cpanm: 57
 	cd autosvg && sudo $(MAKE) $(optmake) configure
 	touch "$@"
 
-gnome: 60 61
+gnome: 70 71
 
-60:
+70:
 	sudo pacman $(optnoconfirm) -S mesa xf86-video-intel xorg-server xorg-apps
 	@echo "Selection recommendations:"
 	@echo "  libjack.so provider, select 2 (jack2)"
@@ -208,14 +208,14 @@ gnome: 60 61
 	sudo pacman $(optnoconfirm) -S gnome gnome-extra
 	touch "$@"
 
-61:
-	./cfg-61-gnome-conf.sh
+71:
+	./cfg-71-gnome-conf.sh
 	touch "$@"
 
-i3: 70 71
+i3: 75 76
 
-70:
-	sudo pacman $(optnoconfirm) -S i3-wm hsetroot i3lock xautolock numlockx otf-font-awesome dmenu
+75:
+	sudo pacman $(optnoconfirm) -S i3-wm hsetroot i3lock xautolock numlockx otf-font-awesome dmenu cmus
 #     altab-git installation with yaourt produces an error. The commit is:
 #         45816dc7777b63284bd82c49683e7dd6d9955571
 #         of 2020-04-21
@@ -234,17 +234,17 @@ i3: 70 71
 	fi
 	touch "$@"
 
-i3-conf: 71
+i3-conf: 76
 
-71:
-	tar -zxvf cfg-71-i3-conf.tar.gz
+76:
+	tar -zxvf cfg-76-i3-conf.tar.gz
 	cd i3-conf && $(MAKE) $(optmake) install
 	touch "$@"
 
 pkg-gui: 80
 
 80:
-	sudo pacman $(optnoconfirm) -S alacritty
+	sudo pacman $(optnoconfirm) -S alacritty termite
 	-@if [ "$(noconfirm)" == "1" ]; then \
 		sudo pacman $(optnoconfirm) -R vim; \
 	fi
@@ -254,7 +254,7 @@ pkg-gui: 80
 	sudo pacman $(optnoconfirm) -S thunderbird thunderbird-i18n-fr
 	sudo pacman $(optnoconfirm) -S firefox firefox-i18n-fr
 	sudo pacman $(optnoconfirm) -S qbittorrent gimp keepassxc
-	sudo pacman $(optnoconfirm) -S conky
+	sudo pacman $(optnoconfirm) -S conky jq bc
 	@echo "Selection recommendations:"
 	@echo "  phonon-qt5-backend provider, select 2 (phonon-qt5-vlc)"
 	@echo "Press [Enter] key to continue"
@@ -263,6 +263,20 @@ pkg-gui: 80
 	fi
 	sudo pacman $(optnoconfirm) -S gwenview
 	balooctl disable
+	touch "$@"
+
+conky-meteo: 90
+
+90:
+	mkdir -p ~/tmp
+	cd ~/tmp && \
+		git clone https://github.com/zagortenay333/Harmattan.git && \
+		cd Harmattan && \
+		cp -aiv .harmattan-assets ~/.
+	touch "$@"
+
+91:
+	./cfg-91-update-conkyrc-netdev.sh
 	touch "$@"
 
 .PHONY: clean mrproper

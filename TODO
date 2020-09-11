@@ -1,0 +1,52 @@
+[FAIT] Configuration GNOME
+    Coin supérieur gauche ne déclenche plus le menu (gnome-tweaks)
+
+Impression
+    cups, cups-pdf, pour imprimer
+        /etc/cups/cups-pdf.conf: modifier Out pour régler le répertoire
+        d'enregistrement.
+    Démarrer (et enabler)
+        org.cups.cupsd.service
+
+Epson ET-M3170
+    Pour l'imprimante :
+        yaourt -a epson-inkjet-printer-escpr2
+    Pour le scanner :
+        sudo pacman -S imagescan
+        yaourt -a imagescan-plugin-networkscan
+        Ensuite éditer le fichier
+            /etc/utsushi/utsushi.conf
+        comme suit :
+            [devices]
+            myscanner.udi    = esci:networkscan://192.168.0.42:1865
+            myscanner.vendor = EPSON
+            myscanner.model  = ET-M3170
+    Pour que la webcam n'apparaisse pas comme scanner, modifier
+        /etc/sane.d/v4l.conf
+        (commenter toutes les lignes)
+        ou bien, supprimer ce fichier...
+
+Installer libreOffice :
+    libreoffice
+    libreoffice-still-fr
+
+Installer pelican
+    sudo pacman -S pelican
+    sudo pacman -S python-pip
+    pip install Markdown
+Installer un thème pelican (si les thèmes sont dans ./pelican-themes)
+    sudo pelican-themes -v -i pelican-themes/tuxlite_tbs
+
+Installer sysstat (pour avoir iostat)
+
+Installer fd
+
+pwfeedback dans config sudo
+
+perl: installer Data::Printer
+perl: installer Perl::Tidy
+perl: installer Perl::Critic
+
+[FAIT] Enlever la cible kernsign si archive publique
+
+[FAIT] installer cmus ? (pour i3)

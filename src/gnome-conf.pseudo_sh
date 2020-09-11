@@ -16,18 +16,23 @@ gsettings set org.gnome.desktop.background picture-options 'none'
 gsettings set org.gnome.desktop.background primary-color '#004956'
 
 # ############################################################################
+# Remove magic of top left corner
+
+gsettings set org.gnome.desktop.interface enable-hot-corners 'false'
+
+# ############################################################################
 # Create key bindings
 #   Ctrl-Alt-T: open terminal (alacritty) with tmux inside
 #   Ctrl-Alt-U: same as above, but attaching to an existing session
 
 gsettings set org.gnome.settings-daemon.plugins.media-keys custom-keybindings "['/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/', '/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom1/']"
 
-gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/ name 'Terminal'
-gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/ command 'alacritty -e tmux'
+gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/ name 'Terminal (termite)'
+gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/ command 'termite -e tmux'
 gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/ binding '<Ctrl><Alt>T'
 
-gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom1/ name 'Terminal (attached)'
-gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom1/ command 'alacritty -e tmux attach'
+gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom1/ name 'Terminal (alacritty)'
+gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom1/ command 'alacritty -e tmux'
 gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom1/ binding '<Ctrl><Alt>U'
 
 # ############################################################################
@@ -52,7 +57,7 @@ gsettings set org.gnome.desktop.input-sources sources "[('xkb', 'fr+oss')]"
 # ############################################################################
 # Mouse left-handed
 
-gsettings set org.gnome.desktop.peripherals.mouse left-handed 'true'
+#gsettings set org.gnome.desktop.peripherals.mouse left-handed 'true'
 
 # ############################################################################
 # Session settings
@@ -66,6 +71,9 @@ gsettings set org.gnome.desktop.wm.preferences button-layout 'appmenu:minimize,m
 # Show battery %
 
 gsettings set org.gnome.desktop.interface show-battery-percentage 'true'
+
+# ############################################################################
+# Avoid 'go-to-sleep' when closing the laptop lid
 
 mkdir -p ~/tmp
 cat > ~/tmp/ignore-lid-switch-tweak.desktop << GNOME_CONF_SH_EOF

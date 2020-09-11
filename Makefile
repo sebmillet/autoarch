@@ -82,18 +82,19 @@ install: uefikeys/Makefile csdcard/Makefile
 	cd src && tar -h -zcvf autosvg.tar.gz autosvg
 	cp src/gpgkeys.txt install/cfg-58-gpgkeys.txt
 	mv src/autosvg.tar.gz install/cfg-59-autosvg.tar.gz
-	cp src/gnome-inst.txt install/cfg-60-gnome-inst.txt
-	cp src/gnome-conf.pseudo_sh install/cfg-61-gnome-conf.sh
-	./manage-includes.sh install/cfg-61-gnome-conf.sh
-	cp src/i3-inst.txt install/cfg-70-i3-inst.txt
+	cp src/gnome-inst.txt install/cfg-70-gnome-inst.txt
+	cp src/gnome-conf.pseudo_sh install/cfg-71-gnome-conf.sh
+	./manage-includes.sh install/cfg-71-gnome-conf.sh
+	cp src/i3-inst.txt install/cfg-75-i3-inst.txt
 	mkdir -p install/i3-conf && \
 		cd install/i3-conf && \
 		cp -vL --preserve=all ../../src/i3-conf/* . && \
 		cd .. && \
-		tar -zcvf cfg-71-i3-conf.tar.gz i3-conf && \
+		tar -zcvf cfg-76-i3-conf.tar.gz i3-conf && \
 		rm i3-conf/* && \
 		rmdir i3-conf
 	cp src/pkg-gui.txt install/cfg-80-pkg-gui.txt
+	cp src/update-conkyrc-netdev.sh install/cfg-91-update-conkyrc-netdev.sh
 	echo $(shell date --iso-8601=seconds) > install/_timestamp
 	cp README.md install/
 	cp .version install/
